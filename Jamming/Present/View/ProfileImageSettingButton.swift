@@ -24,6 +24,7 @@ final class ProfileImageSettingButton: BaseView {
         let randomIndex = (0...11).randomElement() ?? 0
         let randomImage = UIImage(named: "profile_\(randomIndex)")
         profileImageView.image = randomImage
+        profileImageView.contentMode = .scaleAspectFill
         profileImageView.layer.cornerRadius = profileImageViewSize / 2
         profileImageView.layer.borderColor = UIColor.main.cgColor
         profileImageView.layer.borderWidth = 4

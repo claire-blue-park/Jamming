@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-class SettingListTableViewCell: BaseTableViewCell {
+final class SettingListTableViewCell: BaseTableViewCell {
     
     private let titleLabel = UILabel()
     private let separator = UIView()

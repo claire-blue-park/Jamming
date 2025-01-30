@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-class HistoryCollectionViewCell: BaseCollectionViewCell {
+final class HistoryCollectionViewCell: BaseCollectionViewCell {
     private let searchTextLabel = UILabel()
     private let deleteImageView = UIImageView(image: UIImage(systemName: "xmark"))
     
@@ -33,10 +33,6 @@ class HistoryCollectionViewCell: BaseCollectionViewCell {
     override func setConstraints() {
         contentView.addSubview(searchTextLabel)
         contentView.addSubview(deleteImageView)
-        
-        contentView.snp.makeConstraints { make in
-            make.height.equalTo(cellHeight)
-        }
         
         searchTextLabel.snp.makeConstraints { make in
             make.leading.verticalEdges.equalToSuperview().inset(8)

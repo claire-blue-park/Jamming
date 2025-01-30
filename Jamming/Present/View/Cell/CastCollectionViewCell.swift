@@ -9,7 +9,7 @@ import UIKit
 import Kingfisher
 import SnapKit
 
-class CastCollectionViewCell: BaseCollectionViewCell {
+final class CastCollectionViewCell: BaseCollectionViewCell {
     private let actorImageView = UIImageView()
     private let krNameLabel = UILabel()
     private let enNameLabel = UILabel()
@@ -41,8 +41,8 @@ class CastCollectionViewCell: BaseCollectionViewCell {
         stack.addArrangedSubview(krNameLabel)
         stack.addArrangedSubview(enNameLabel)
         
-        addSubview(actorImageView)
-        addSubview(stack)
+        contentView.addSubview(actorImageView)
+        contentView.addSubview(stack)
         
         actorImageView.snp.makeConstraints { make in
             make.leading.equalToSuperview()

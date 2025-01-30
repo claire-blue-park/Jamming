@@ -18,7 +18,7 @@ final class ProfileSectionView: BaseView {
     private let chevronButton = UIButton()
     private let movieBoxButton = UIButton()
     
-    private let profileImageViewSize = CGFloat(60)
+    private let profileImageViewSize: CGFloat = 60
     
     override func configureView() {
         backgroundColor = .neutral3

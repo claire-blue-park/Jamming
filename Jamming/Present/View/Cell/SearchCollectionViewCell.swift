@@ -9,7 +9,7 @@ import UIKit
 import Kingfisher
 import SnapKit
 
-class SearchCollectionViewCell: BaseCollectionViewCell {
+final class SearchCollectionViewCell: BaseCollectionViewCell {
     
     private let posterImageView = UIImageView()
     private let movieTitleLabel = UILabel()

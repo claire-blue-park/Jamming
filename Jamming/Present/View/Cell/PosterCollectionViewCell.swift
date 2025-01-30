@@ -9,7 +9,7 @@ import UIKit
 import Kingfisher
 import SnapKit
 
-class PosterCollectionViewCell: BaseCollectionViewCell {
+final class PosterCollectionViewCell: BaseCollectionViewCell {
     
     private let posterImageView = UIImageView()
     
@@ -24,7 +24,7 @@ class PosterCollectionViewCell: BaseCollectionViewCell {
     }
 
     override func setConstraints() {
-        addSubview(posterImageView)
+        contentView.addSubview(posterImageView)
         
         posterImageView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
