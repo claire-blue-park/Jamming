@@ -55,4 +55,4 @@ fastlane/test_output
 iOSInjectionProject/
 
 # API Key
-APIKey.swift
+APIKeys.swift
