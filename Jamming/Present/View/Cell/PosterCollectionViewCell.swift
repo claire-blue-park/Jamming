@@ -19,7 +19,8 @@ class PosterCollectionViewCell: BaseCollectionViewCell {
     }
     
     override func configureView() {
-        posterImageView.contentMode = .scaleToFill
+        posterImageView.contentMode = .scaleAspectFill
+        posterImageView.clipsToBounds = true
     }
 
     override func setConstraints() {

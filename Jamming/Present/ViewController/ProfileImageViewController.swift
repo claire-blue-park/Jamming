@@ -11,6 +11,7 @@ import SnapKit
 final class ProfileImageViewController: BaseViewController {
     
     private let profileImageButton = ProfileImageSettingButton()
+    private let profileCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
 
     override func viewDidLoad() {
         super.viewDidLoad()

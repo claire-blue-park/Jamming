@@ -33,32 +33,7 @@ final class MovieDetailViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
-        [backdropCollectionView, posterCollectionView, castCollectionView].forEach { collectionView in
-            collectionView.delegate = self
-            collectionView.dataSource = self
-            
-            let layout = UICollectionViewFlowLayout()
-            layout.scrollDirection = .horizontal
-            
-            let sectionInset: CGFloat = collectionView.tag == 0 ? 0 : gap
-            let spacing: CGFloat = collectionView.tag == 0 ? 0 : gap
-       
-            layout.sectionInset = UIEdgeInsets(top: 0, left: sectionInset, bottom: 0, right: sectionInset)
-            layout.minimumLineSpacing = spacing
-            layout.minimumInteritemSpacing = spacing
-            
-            collectionView.isPagingEnabled = collectionView.tag == 0
-            collectionView.collectionViewLayout = layout
-            collectionView.showsHorizontalScrollIndicator = false
-        }
-        
-
-        backdropCollectionView.register(PosterCollectionViewCell.self, forCellWithReuseIdentifier: PosterCollectionViewCell.getIdentifier)
-
-        posterCollectionView.register(PosterCollectionViewCell.self, forCellWithReuseIdentifier: PosterCollectionViewCell.getIdentifier)
-
-        castCollectionView.register(CastCollectionViewCell.self, forCellWithReuseIdentifier: CastCollectionViewCell.getIdentifier)
+        configureCollectionView()
     }
     
     override func configureNav() {
@@ -77,7 +52,44 @@ final class MovieDetailViewController: BaseViewController {
     @objc
     private func onMoreButtonTapped() {
         isFullText = !isFullText
+        moreButton.configuration?.title = isFullText ? "Detail.Button.Hide".localized() : "Detail.Button.More".localized()
         synopsisLabel.numberOfLines = isFullText ? 0 : 3
+    }
+    
+    private func configureCollectionView() {
+        let collectionViews = [backdropCollectionView, castCollectionView, posterCollectionView]
+        
+        // MARK: - 컬렉션뷰 고유 태그
+        for index in collectionViews.indices {
+            collectionViews[index].tag = index
+        }
+        
+        // MARK: - 프로토콜 연결, 플로우 레이아웃
+        collectionViews.forEach { collectionView in
+            collectionView.delegate = self
+            collectionView.dataSource = self
+            
+            let layout = UICollectionViewFlowLayout()
+            layout.scrollDirection = .horizontal
+            
+            let sectionInset: CGFloat = collectionView.tag == 0 ? 0 : gap
+            let spacing: CGFloat = collectionView.tag == 0 ? 0 : gap
+            
+            layout.sectionInset = UIEdgeInsets(top: 0, left: sectionInset, bottom: 0, right: sectionInset)
+            layout.minimumLineSpacing = spacing
+            layout.minimumInteritemSpacing = spacing
+            
+            collectionView.isPagingEnabled = collectionView.tag == 0
+            collectionView.collectionViewLayout = layout
+            collectionView.showsHorizontalScrollIndicator = false
+        }
+        
+        // MARK: - cell 등록
+        backdropCollectionView.register(PosterCollectionViewCell.self, forCellWithReuseIdentifier: PosterCollectionViewCell.getIdentifier)
+        
+        posterCollectionView.register(PosterCollectionViewCell.self, forCellWithReuseIdentifier: PosterCollectionViewCell.getIdentifier)
+        
+        castCollectionView.register(CastCollectionViewCell.self, forCellWithReuseIdentifier: CastCollectionViewCell.getIdentifier)
     }
     
     override func configureView() {
@@ -87,17 +99,13 @@ final class MovieDetailViewController: BaseViewController {
         synopsisLabel.font = .systemFont(ofSize: 12)
         synopsisLabel.textColor = .neutral2
         synopsisLabel.text = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
+        
         moreButton.configuration = .plainStyle("Detail.Button.More".localized())
         moreButton.addTarget(self, action: #selector(onMoreButtonTapped), for: .touchUpInside)
         
         synopsisTitleLabel.text = "Detail.Title.Synopsis".localized()
         castTitleLabel.text = "Detail.Title.Cast".localized()
         posterTitleLabel.text = "Detail.Title.Poster".localized()
-        
-        let collectionViews = [backdropCollectionView, castCollectionView, posterCollectionView]
-        for index in collectionViews.indices {
-            collectionViews[index].tag = index
-        }
         
         [synopsisTitleLabel, castTitleLabel, posterTitleLabel].forEach { label in
             label.font = .boldSystemFont(ofSize: 16)
@@ -198,7 +206,7 @@ extension MovieDetailViewController: UICollectionViewDelegate, UICollectionViewD
             cell.configureData()
             return cell
         }
-
+        
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
