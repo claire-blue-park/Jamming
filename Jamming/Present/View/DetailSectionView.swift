@@ -29,6 +29,7 @@ class DetailSectionView: BaseStackView {
     override func configureView() {
         [dateIcon, rateIcon, genreIcon].forEach { icon in
             icon.contentMode = .scaleAspectFit
+            icon.tintColor = .neutral2
         }
         
         [dateLabel, rateLabel, genreLabel].forEach { label in
