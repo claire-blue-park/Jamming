@@ -41,27 +41,26 @@ final class MovieCollectionViewCell: BaseCollectionViewCell {
         [posterImageView, movieTitleLabel, storyLabel, likeButton].forEach { view in
             contentView.addSubview(view)
         }
-        posterImageView.snp.makeConstraints { make in
-            make.top.equalToSuperview()
-            make.width.equalTo(200)
-            make.height.equalTo(280)
-        }
-        
-        likeButton.snp.makeConstraints { make in
-            make.top.equalTo(posterImageView.snp.bottom).offset(12)
-            make.trailing.equalTo(posterImageView.snp.trailing)
-        }
-        
-        movieTitleLabel.snp.makeConstraints { make in
-            make.leading.equalTo(posterImageView.snp.leading)
-            make.centerY.equalTo(likeButton.snp.centerY)
-        }
         
         storyLabel.snp.makeConstraints { make in
-            make.top.equalTo(likeButton.snp.bottom).offset(12)
-            make.leading.equalTo(posterImageView.snp.leading)
-            make.trailing.equalTo(posterImageView.snp.trailing)
+            make.bottom.horizontalEdges.equalToSuperview()
         }
-        
+
+        movieTitleLabel.snp.makeConstraints { make in
+            make.bottom.equalTo(storyLabel.snp.top).offset(-12)
+            make.leading.equalToSuperview()
+            make.trailing.equalTo(likeButton.snp.leading).offset(-12)
+        }
+
+        likeButton.snp.makeConstraints { make in
+            make.centerY.equalTo(movieTitleLabel.snp.centerY)
+            make.trailing.equalToSuperview()
+        }
+
+        posterImageView.snp.makeConstraints { make in
+            make.bottom.equalTo(movieTitleLabel.snp.top).offset(-12)
+            make.horizontalEdges.equalToSuperview()
+            make.top.equalToSuperview()
+        }
     }
 }

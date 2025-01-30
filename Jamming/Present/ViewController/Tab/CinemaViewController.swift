@@ -19,6 +19,8 @@ final class CinemaViewController: BaseViewController {
     
     private let movieTitleLabel = UILabel()
     private let movieCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+    
+    private let sectionInset: CGFloat = 12
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -56,8 +58,10 @@ final class CinemaViewController: BaseViewController {
         
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
-        layout.sectionInset = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 12)
+        layout.sectionInset = UIEdgeInsets(top: 0, left: sectionInset, bottom: 0, right: sectionInset)
+        layout.minimumInteritemSpacing = 12
         movieCollectionView.collectionViewLayout = layout
+        movieCollectionView.showsHorizontalScrollIndicator = false
         movieCollectionView.register(MovieCollectionViewCell.self, forCellWithReuseIdentifier: MovieCollectionViewCell.getIdentifier)
     }
     
@@ -104,15 +108,16 @@ final class CinemaViewController: BaseViewController {
         
         movieCollectionView.snp.makeConstraints { make in
             make.top.equalTo(movieTitleLabel.snp.bottom).offset(12)
-            make.bottom.horizontalEdges.equalTo(view.safeAreaLayoutGuide)
+            make.bottom.equalTo(view.safeAreaLayoutGuide).inset(12)
+            make.horizontalEdges.equalTo(view.safeAreaLayoutGuide)
         }
     }
 
 }
 
-extension CinemaViewController: UICollectionViewDelegate, UICollectionViewDataSource {
+extension CinemaViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 1
+        return 10
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -121,4 +126,15 @@ extension CinemaViewController: UICollectionViewDelegate, UICollectionViewDataSo
         return cell
     }
 
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        print(#function)
+        navigationController?.pushViewController(MovieDetailViewController(), animated: true)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let cellsWidth = (UIScreen.main.bounds.width - sectionInset * 2) * 0.6
+        let cellsHeight = cellsWidth * 1.6
+
+        return CGSize(width: cellsWidth, height: cellsHeight)
+    }
 }
