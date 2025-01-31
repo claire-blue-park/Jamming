@@ -10,7 +10,6 @@ import Kingfisher
 import SnapKit
 
 final class SearchCollectionViewCell: BaseCollectionViewCell {
-    
     private let posterImageView = UIImageView()
     private let movieTitleLabel = UILabel()
     private let dateLabel = UILabel()
@@ -29,7 +28,16 @@ final class SearchCollectionViewCell: BaseCollectionViewCell {
         return label
     }
     
+    private var movieId: Int?
+    private var isLike = false
+    
     func configureData(movie: MovieInfo) {
+        if let movieId = movie.id {
+            self.movieId = movieId
+            isLike = UserDefaultsHelper.shared.getMoviebox().contains(movieId)
+            updateLikeButtonState()
+        }
+        
         if let path = movie.posterPath {
             let imageUrl = PosterSize.poster154.baseURL + path
             posterImageView.kf.setImage(with: URL(string: imageUrl))
@@ -61,6 +69,10 @@ final class SearchCollectionViewCell: BaseCollectionViewCell {
     }
     
     override func configureView() {
+        updateLikeButtonState()
+        likeButton.tintColor = .main
+        likeButton.addTarget(self, action: #selector(onLikeButtonTapped), for: .touchUpInside)
+        
         posterImageView.layer.cornerRadius = 4
         posterImageView.clipsToBounds = true
         posterImageView.contentMode = .scaleAspectFill
@@ -74,9 +86,26 @@ final class SearchCollectionViewCell: BaseCollectionViewCell {
         genreStack.axis = .horizontal
         genreStack.spacing = 4
         
-        likeButton.configuration = .likeStyle()
-        
         separator.backgroundColor = .neutral3
+    }
+    
+    private func updateLikeButtonState() {
+        let likeImage = isLike ? UIImage(systemName: "heart.fill") : UIImage(systemName: "heart")
+        likeButton.setImage(likeImage, for: .normal)
+    }
+    
+    @objc
+    private func onLikeButtonTapped() {
+        guard let movieId else { return }
+        
+        isLike.toggle()
+        
+        if isLike {
+            UserDefaultsHelper.shared.saveMoviebox(movieId: movieId)
+        } else {
+            UserDefaultsHelper.shared.removeMoviebox(movieId: movieId)
+        }
+        updateLikeButtonState()
     }
     
     override func setConstraints() {
@@ -112,6 +141,7 @@ final class SearchCollectionViewCell: BaseCollectionViewCell {
         }
         
         likeButton.snp.makeConstraints { make in
+            make.size.equalTo(20)
             make.trailing.equalToSuperview()
             make.bottom.equalTo(separator.snp.top).offset(-12)
         }

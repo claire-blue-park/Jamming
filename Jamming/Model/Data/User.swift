@@ -23,7 +23,7 @@ final class User {
         UserDefaultsHelper.shared.getRegisterDate()
     }
     
-    var moviebox: [String] {
+    var moviebox: [Int] {
         UserDefaultsHelper.shared.getMoviebox()
     }
     

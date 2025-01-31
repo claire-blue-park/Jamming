@@ -47,22 +47,34 @@ final class UserDefaultsHelper {
     }
 
     // MARK: - data
-    func saveMoviebox(moviebox: [String]) {
+    func saveMoviebox(movieId: Int) {
+        var moviebox = UserDefaultsHelper.shared.getMoviebox()
+        if !moviebox.contains(movieId) {
+            moviebox.append(movieId)
+        }
         UserDefaults.standard.set(moviebox, forKey: movieboxKey)
+        print(UserDefaultsHelper.shared.getMoviebox())
+    }
+    func removeMoviebox(movieId: Int) {
+        var moviebox = UserDefaultsHelper.shared.getMoviebox()
+        if moviebox.contains(movieId) {
+            if let index = moviebox.firstIndex(of: movieId) {
+                moviebox.remove(at: index)
+            }
+        }
+        UserDefaults.standard.set(moviebox, forKey: movieboxKey)
+        print(UserDefaultsHelper.shared.getMoviebox())
+    }
+    func getMoviebox() -> [Int] {
+        return (UserDefaults.standard.array(forKey: movieboxKey) ?? []) as! [Int]
     }
     
     func saveSearchHistory(searches: [String]) {
         UserDefaults.standard.set(searches, forKey: searchKey)
     }
-    
-    func getMoviebox() -> [String] {
-        return UserDefaults.standard.stringArray(forKey: movieboxKey) ?? []
-    }
-    
     func getSearchHistory() -> [String] {
         return UserDefaults.standard.stringArray(forKey: searchKey) ?? []
     }
-    
     
     // MARK: - Reset
     func removeAllData() {

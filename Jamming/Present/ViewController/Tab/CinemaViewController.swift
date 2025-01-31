@@ -46,6 +46,10 @@ final class CinemaViewController: BaseViewController {
         configureCollectionView()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        movieCollectionView.reloadData()
+    }
+    
     override func configureNav() {
         navigationItem.title = "Tab.First.Title".localized()
         let item = UIBarButtonItem.init(image: UIImage(systemName: "magnifyingglass"), style: .plain, target: self, action: #selector(switchSearchScreen))
@@ -196,6 +200,8 @@ extension CinemaViewController: UICollectionViewDelegate, UICollectionViewDataSo
         default:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MovieCollectionViewCell.getIdentifier, for: indexPath) as! MovieCollectionViewCell
             cell.configureData(movie: movies[indexPath.row])
+//            cell.likeButton.movieId = movies[indexPath.row].id
+//            cell.likeButton.likeDelegate = self
             return cell
         }
     }

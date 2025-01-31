@@ -13,6 +13,7 @@ final class MovieDetailViewController: BaseViewController {
     private let scrollView = UIScrollView()
     
     private let backdropCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+    private let pageControl = UIPageControl()
     private let detailSectionView = DetailSectionView()
     
     private let synopsisTitleLabel = UILabel()
@@ -34,6 +35,9 @@ final class MovieDetailViewController: BaseViewController {
     private let heightCastSection: CGFloat = 160
     private let heightPosterSection: CGFloat = 200
     
+    private var movieId: Int?
+    private var isLike = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         callNetwork()
@@ -41,14 +45,28 @@ final class MovieDetailViewController: BaseViewController {
     }
     
     override func configureNav() {
+        guard let movieId = movie?.id else { return }
+        
         navigationItem.title = movie?.title
-        let item = UIBarButtonItem.init(image: UIImage(systemName: "heart"),style: .plain, target: self, action: #selector(onLikeButtonTapped))
+        isLike = UserDefaultsHelper.shared.getMoviebox().contains(movieId)
+        let item = UIBarButtonItem.init(image: isLike ? UIImage(systemName: "heart.fill") : UIImage(systemName: "heart"), style: .plain, target: self, action: #selector(onLikeButtonTapped))
         navigationItem.rightBarButtonItem = item
     }
     
+    
     @objc
-    private func onLikeButtonTapped() {
+    private func onLikeButtonTapped(_ button: UIBarButtonItem) {
+        guard let movieId = movie?.id else { return }
         
+        isLike.toggle()
+        
+        if isLike {
+            UserDefaultsHelper.shared.saveMoviebox(movieId: movieId)
+        } else {
+            UserDefaultsHelper.shared.removeMoviebox(movieId: movieId)
+        }
+        
+        button.image = isLike ? UIImage(systemName: "heart.fill") : UIImage(systemName: "heart")
     }
     
     @objc
@@ -127,6 +145,10 @@ final class MovieDetailViewController: BaseViewController {
     override func configureView() {
         scrollView.showsVerticalScrollIndicator = false
         
+        pageControl.numberOfPages = movie?.backdropPath?.count ?? 0
+        pageControl.backgroundStyle = .prominent
+        pageControl.currentPage = 0
+        
         detailSectionView.configureData(date: movie?.releaseDate ?? "All.Unknown".localized(),
                                         rate: movie?.voteAverage ?? 0.0,
                                         genreCodes: movie?.genreIds ?? [-1])
@@ -166,7 +188,7 @@ final class MovieDetailViewController: BaseViewController {
             make.verticalEdges.equalToSuperview().inset(12)
         }
         
-        [backdropCollectionView, detailSectionView,
+        [backdropCollectionView, pageControl, detailSectionView,
          synopsisTitleLabel, synopsisLabel, moreButton,
          castTitleLabel, castCollectionView,
          posterTitleLabel, posterCollectionView].forEach { view in
@@ -177,6 +199,11 @@ final class MovieDetailViewController: BaseViewController {
         backdropCollectionView.snp.makeConstraints { make in
             make.top.horizontalEdges.equalToSuperview()
             make.height.equalTo(heightBackdropSection)
+        }
+        
+        pageControl.snp.makeConstraints { make in
+            make.bottom.equalTo(backdropCollectionView.snp.bottom).inset(12)
+            make.centerX.equalTo(backdropCollectionView.snp.centerX)
         }
         
         detailSectionView.snp.makeConstraints { make in
@@ -265,5 +292,11 @@ extension MovieDetailViewController: UICollectionViewDelegate, UICollectionViewD
         }
     
         return CGSize(width: cellsWidth, height: cellsHeight)
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if scrollView == backdropCollectionView {
+            pageControl.currentPage = Int(floor(scrollView.contentOffset.x / UIScreen.main.bounds.width))
+        }
     }
 }

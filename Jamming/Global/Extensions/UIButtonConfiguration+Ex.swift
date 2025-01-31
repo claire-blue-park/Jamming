@@ -36,13 +36,16 @@ extension UIButton.Configuration {
         return configuration
     }
     
-    static func likeStyle() -> UIButton.Configuration {
-        var configuration = UIButton.Configuration.plain()
-        let imageConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .light)
-        configuration.image = UIImage(systemName: "heart", withConfiguration: imageConfig)
-        configuration.contentInsets = .zero
-        configuration.baseForegroundColor = UIColor.main
-        return configuration
-    }
+//    static func likeStyle(isLike: Bool) -> UIButton.Configuration {
+//        var configuration = UIButton.Configuration.plain()
+//        let imageConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .light)
+//        configuration.image = isLike
+//                            ? UIImage(systemName: "heart.fill", withConfiguration: imageConfig)
+//                            : UIImage(systemName: "heart", withConfiguration: imageConfig)
+////        configuration.image = UIImage(systemName: "heart", withConfiguration: imageConfig)
+//        configuration.contentInsets = .zero
+//        configuration.baseForegroundColor = UIColor.main
+//        return configuration
+//    }
     
 }
