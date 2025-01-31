@@ -50,10 +50,14 @@ final class ProfileEditingViewController: BaseViewController {
     
     @objc
     private func switchScreenWithSave() {
-        if !isCorrectNickname { return }
+        let isNicknameChanged = UserDefaultsHelper.shared.getNickname() != nicknameTextField.actualTextField.text
+        let isProfileImageChanged = UserDefaultsHelper.shared.getImageName() != profileImageButton.getImageName()
+        
+        // 닉네임 변경되었는데 올바르지 않을 경우
+        if isNicknameChanged && !isCorrectNickname { return }
+        
         // 프로필 변경이 있을 경우
-        if UserDefaultsHelper.shared.getNickname() != nicknameTextField.actualTextField.text ||
-           UserDefaultsHelper.shared.getImageName() != profileImageButton.getImageName() {
+        if isNicknameChanged || isProfileImageChanged {
             
             // 1. 저장
             UserDefaultsHelper.shared.saveUser(nickname: nicknameTextField.actualTextField.text!, image: profileImageButton.getImageName())
@@ -78,7 +82,7 @@ final class ProfileEditingViewController: BaseViewController {
         
         // 기존 값 가져오기
         profileImageButton.setImage(imageName: UserDefaultsHelper.shared.getImageName())
-        nicknameTextField.actualTextField.placeholder = UserDefaultsHelper.shared.getNickname()
+        nicknameTextField.actualTextField.text = UserDefaultsHelper.shared.getNickname()
         nicknameTextField.actualTextField.addTarget(self, action: #selector(onEditingChanged), for: .editingChanged)
     }
     

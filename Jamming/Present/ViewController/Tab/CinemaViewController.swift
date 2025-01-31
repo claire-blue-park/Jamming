@@ -61,8 +61,8 @@ final class CinemaViewController: BaseViewController {
     
     // MARK: -  Network
     private func callNetwork() {
-        NetworkManager.shared.callRequest(api: .trending) { (trendingData: TrendingData) in
-            self.movies = trendingData.results
+        NetworkManager.shared.callRequest(api: .trending) { [weak self] (trendingData: TrendingData) in
+            self?.movies = trendingData.results
         } failureHandler: { code, message in
             print(message)
         }

@@ -57,7 +57,8 @@ final class HistoryCollectionViewCell: BaseCollectionViewCell {
         }
         
         actualButton.snp.makeConstraints { make in
-            make.edges.equalTo(deleteImageView.snp.edges)
+            make.leading.equalTo(deleteImageView)
+            make.trailing.verticalEdges.equalToSuperview()
         }
         
     }

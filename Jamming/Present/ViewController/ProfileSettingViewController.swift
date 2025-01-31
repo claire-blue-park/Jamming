@@ -41,6 +41,8 @@ final class ProfileSettingViewController: BaseViewController {
     }
     
     override func configureView() {
+        profileImageButton.setImage(imageName: "profile_\((0...11).randomElement() ?? 0)")
+        
         errorLabel.text = ""
         errorLabel.font = .systemFont(ofSize: 12)
         errorLabel.textColor = .main

@@ -16,12 +16,16 @@ final class MovieSearchingViewController: BaseViewController {
     private let searchBar = UISearchBar()
     private let noValueInfoLabel = UILabel()
     private let searchCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
-    private var searchData: SearchData? {
+    private var searchData: SearchData?
+    private var movies: [MovieInfo] = [] {
         willSet {
-            noValueInfoLabel.isHidden = !(newValue?.results.isEmpty ?? true)
+            noValueInfoLabel.isHidden = !newValue.isEmpty
             searchCollectionView.reloadData()
         }
     }
+    
+    private var page = 1
+    private var totalPages = 0
     private let sectionInset: CGFloat = 12
 
     override func viewDidLoad() {
@@ -40,10 +44,27 @@ final class MovieSearchingViewController: BaseViewController {
         navigationItem.title = "Searching.Title".localized()
     }
     
+    private func scrollToTop() {
+        searchCollectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
+    }
+    
     // MARK: -  Network
     private func callNetwork(query: String) {
-        NetworkManager.shared.callRequest(api: .search(query: query)) { (searchData: SearchData) in
-            self.searchData = searchData
+        NetworkManager.shared.callRequest(api: .search(query: query, page: page)) { [weak self] (searchData: SearchData) in
+        
+            // 처음 불러오는 경우
+            if self?.page == 1 {
+                self?.movies = searchData.results
+                self?.totalPages = searchData.totalPages
+                if !searchData.results.isEmpty {
+                    self?.scrollToTop()
+                }
+            } else {
+            // 기존 값 있는 경우
+                self?.movies.append(contentsOf: searchData.results)
+            }
+            
+            self?.searchData = searchData
         } failureHandler: { code, message in
             print(message)
         }
@@ -53,6 +74,8 @@ final class MovieSearchingViewController: BaseViewController {
     private func configureCollectionView() {
         searchCollectionView.delegate = self
         searchCollectionView.dataSource = self
+        searchCollectionView.prefetchDataSource = self
+        searchCollectionView.showsVerticalScrollIndicator = false
         
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
@@ -64,7 +87,9 @@ final class MovieSearchingViewController: BaseViewController {
     
     override func configureView() {
         searchBar.searchBarStyle = .minimal
-        searchBar.becomeFirstResponder()
+        if searchBar.text!.isEmpty {
+            searchBar.becomeFirstResponder()
+        }
         
         noValueInfoLabel.text = "Searching.Info.NoValue".localized()
         noValueInfoLabel.isHidden = true
@@ -104,6 +129,7 @@ extension MovieSearchingViewController: UISearchBarDelegate {
         if query.isEmpty {
             showConfirmAlert(title: "Alert.Title.InputQuery".localized(), message: "Alert.Message.InputQuery".localized())
         } else {
+            page = 1
             searchHistory.append(query)
             callNetwork(query: query)
         }
@@ -113,15 +139,19 @@ extension MovieSearchingViewController: UISearchBarDelegate {
 
 extension MovieSearchingViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout  {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return searchData?.results.count ?? 0
+        return movies.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SearchCollectionViewCell.getIdentifier, for: indexPath) as! SearchCollectionViewCell
-        if let movies = searchData?.results {
-            cell.configureData(movie: movies[indexPath.row])
-        }
+        cell.configureData(movie: movies[indexPath.row])
         return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let nav = MovieDetailViewController()
+        nav.movie = movies[indexPath.row]
+        navigationController?.pushViewController(nav, animated: true)
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -129,6 +159,20 @@ extension MovieSearchingViewController: UICollectionViewDelegate, UICollectionVi
         let cellsWidth = UIScreen.main.bounds.width - sectionInset * 2
         
         return CGSize(width: cellsWidth, height: cellsWidth * 0.3)
+    }
+    
+}
+
+extension MovieSearchingViewController: UICollectionViewDataSourcePrefetching {
+    func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
+        let isEnd = page == totalPages
+        
+        for item in indexPaths {
+            if isEnd == false && movies.count - 2 == item.row {
+                page += 1
+                callNetwork(query: searchBar.text!)
+            }
+        }
     }
     
 }

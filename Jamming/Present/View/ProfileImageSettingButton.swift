@@ -12,7 +12,8 @@ final class ProfileImageSettingButton: BaseView {
     
     var parentView: BaseViewController?
 
-    private var imageName = "profile_\((0...11).randomElement() ?? 0)"
+//    private var imageName = "profile_\((0...11).randomElement() ?? 0)"
+    private var imageName = ""
     
     private let profileImageView = UIImageView()
     private let circleView = UIView()
@@ -32,7 +33,6 @@ final class ProfileImageSettingButton: BaseView {
     }
 
     override func configureView() {
-        profileImageView.image = UIImage(named: imageName)
         profileImageView.contentMode = .scaleAspectFill
         profileImageView.layer.cornerRadius = profileImageViewSize / 2
         profileImageView.layer.borderColor = UIColor.main.cgColor

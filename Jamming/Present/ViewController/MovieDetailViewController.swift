@@ -64,8 +64,8 @@ final class MovieDetailViewController: BaseViewController {
         
         // 1. 이미지 API
         group.enter()
-        NetworkManager.shared.callRequest(api: .image(movieId: movie?.id ?? 0)) { (imageData: ImageData) in
-            self.imageData = imageData
+        NetworkManager.shared.callRequest(api: .image(movieId: movie?.id ?? 0)) { [weak self] (imageData: ImageData) in
+            self?.imageData = imageData
             group.leave()
         } failureHandler: { code, message in
             print(message)
@@ -74,14 +74,14 @@ final class MovieDetailViewController: BaseViewController {
         
         // 2. 캐스트 API
         group.enter()
-        NetworkManager.shared.callRequest(api: .credit(movieId: movie?.id ?? 0)) { (creditData: CreditData) in
-            self.creditData = creditData
+        NetworkManager.shared.callRequest(api: .credit(movieId: movie?.id ?? 0)) { [weak self] (creditData: CreditData) in
+            self?.creditData = creditData
             group.leave()
         } failureHandler: { code, message in
             group.leave()
         }
         
-        group.notify(queue: .main) {
+        group.notify(queue: .main) { 
             self.backdropCollectionView.reloadData()
             self.castCollectionView.reloadData()
             self.posterCollectionView.reloadData()
@@ -93,12 +93,12 @@ final class MovieDetailViewController: BaseViewController {
     private func configureCollectionView() {
         let collectionViews = [backdropCollectionView, castCollectionView, posterCollectionView]
         
-        // MARK: - 컬렉션뷰 고유 태그
+        // 컬렉션뷰 고유 태그
         for index in collectionViews.indices {
             collectionViews[index].tag = index
         }
         
-        // MARK: - 프로토콜 연결, 플로우 레이아웃
+        // 프로토콜 연결, 플로우 레이아웃
         collectionViews.forEach { collectionView in
             collectionView.delegate = self
             collectionView.dataSource = self
@@ -118,13 +118,15 @@ final class MovieDetailViewController: BaseViewController {
             collectionView.showsHorizontalScrollIndicator = false
         }
         
-        // MARK: - cell 등록
+        // cell 등록
         backdropCollectionView.register(PosterCollectionViewCell.self, forCellWithReuseIdentifier: PosterCollectionViewCell.getIdentifier)
         posterCollectionView.register(PosterCollectionViewCell.self, forCellWithReuseIdentifier: PosterCollectionViewCell.getIdentifier)
         castCollectionView.register(CastCollectionViewCell.self, forCellWithReuseIdentifier: CastCollectionViewCell.getIdentifier)
     }
     
     override func configureView() {
+        scrollView.showsVerticalScrollIndicator = false
+        
         detailSectionView.configureData(date: movie?.releaseDate ?? "All.Unknown".localized(),
                                         rate: movie?.voteAverage ?? 0.0,
                                         genreCodes: movie?.genreIds ?? [-1])

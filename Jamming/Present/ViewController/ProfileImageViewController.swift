@@ -41,6 +41,7 @@ final class ProfileImageViewController: BaseViewController {
     
     override func configureView() {
         profileImageButton.isUserInteractionEnabled = false
+        profileImageButton.setImage(imageName: UserDefaultsHelper.shared.getImageName())
     }
     
     private func configureCollectionView() {
