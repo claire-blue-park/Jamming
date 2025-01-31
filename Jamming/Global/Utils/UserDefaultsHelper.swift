@@ -16,6 +16,7 @@ final class UserDefaultsHelper {
     private let imageKey = "USER_IMAGE"
     private let dateKey = "USER_DATE"
     private let movieboxKey = "USER_MOVIEBOX"
+    private let searchKey = "USER_SEARCH"
     
     // MARK: - 스크린
     func isStarted() -> Bool {
@@ -33,10 +34,6 @@ final class UserDefaultsHelper {
         UserDefaults.standard.set(date, forKey: dateKey)
     }
     
-    func saveMoviebox(moviebox: [String]) {
-        UserDefaults.standard.set(moviebox, forKey: movieboxKey)
-    }
-    
     func getNickname() -> String {
         return UserDefaults.standard.string(forKey: nicknameKey) ?? "All.Unknown".localized()
     }
@@ -48,9 +45,22 @@ final class UserDefaultsHelper {
     func getRegisterDate() -> String {
         return UserDefaults.standard.string(forKey: dateKey) ?? "All.Unknown".localized()
     }
+
+    // MARK: - data
+    func saveMoviebox(moviebox: [String]) {
+        UserDefaults.standard.set(moviebox, forKey: movieboxKey)
+    }
+    
+    func saveSearchHistory(searches: [String]) {
+        UserDefaults.standard.set(searches, forKey: searchKey)
+    }
     
     func getMoviebox() -> [String] {
         return UserDefaults.standard.stringArray(forKey: movieboxKey) ?? []
+    }
+    
+    func getSearchHistory() -> [String] {
+        return UserDefaults.standard.stringArray(forKey: searchKey) ?? []
     }
     
     

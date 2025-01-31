@@ -9,8 +9,12 @@ import UIKit
 import SnapKit
 
 final class HistoryCollectionViewCell: BaseCollectionViewCell {
+    
+    var deleteSearch: (() -> Void)?
+    
     private let searchTextLabel = UILabel()
     private let deleteImageView = UIImageView(image: UIImage(systemName: "xmark"))
+    private let actualButton = UIButton()
     
     private let cellHeight: CGFloat = 28
     
@@ -28,11 +32,19 @@ final class HistoryCollectionViewCell: BaseCollectionViewCell {
         
         deleteImageView.tintColor = .neutral4
         deleteImageView.contentMode = .scaleAspectFill
+        
+        actualButton.addTarget(self, action: #selector(onDeleteButtonTapped), for: .touchUpInside)
+    }
+    
+    @objc
+    private func onDeleteButtonTapped() {
+        deleteSearch?()
     }
     
     override func setConstraints() {
-        contentView.addSubview(searchTextLabel)
-        contentView.addSubview(deleteImageView)
+        [searchTextLabel, deleteImageView, actualButton].forEach { view in
+            contentView.addSubview(view)
+        }
         
         searchTextLabel.snp.makeConstraints { make in
             make.leading.verticalEdges.equalToSuperview().inset(8)
@@ -42,6 +54,10 @@ final class HistoryCollectionViewCell: BaseCollectionViewCell {
             make.leading.equalTo(searchTextLabel.snp.trailing).offset(4)
             make.trailing.verticalEdges.equalToSuperview().inset(8)
             make.size.equalTo(12)
+        }
+        
+        actualButton.snp.makeConstraints { make in
+            make.edges.equalTo(deleteImageView.snp.edges)
         }
         
     }

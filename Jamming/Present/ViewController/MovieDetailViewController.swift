@@ -25,7 +25,7 @@ final class MovieDetailViewController: BaseViewController {
     private let posterTitleLabel = UILabel()
     private let posterCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     
-    var trend: Trends?
+    var movie: MovieInfo?
     var imageData: ImageData?
     var creditData: CreditData?
     
@@ -41,7 +41,7 @@ final class MovieDetailViewController: BaseViewController {
     }
     
     override func configureNav() {
-        navigationItem.title = trend?.title
+        navigationItem.title = movie?.title
         let item = UIBarButtonItem.init(image: UIImage(systemName: "heart"),style: .plain, target: self, action: #selector(onLikeButtonTapped))
         navigationItem.rightBarButtonItem = item
     }
@@ -64,7 +64,7 @@ final class MovieDetailViewController: BaseViewController {
         
         // 1. 이미지 API
         group.enter()
-        NetworkManager.shared.callRequest(api: .image(movieId: trend?.id ?? 0)) { (imageData: ImageData) in
+        NetworkManager.shared.callRequest(api: .image(movieId: movie?.id ?? 0)) { (imageData: ImageData) in
             self.imageData = imageData
             group.leave()
         } failureHandler: { code, message in
@@ -74,7 +74,7 @@ final class MovieDetailViewController: BaseViewController {
         
         // 2. 캐스트 API
         group.enter()
-        NetworkManager.shared.callRequest(api: .credit(movieId: trend?.id ?? 0)) { (creditData: CreditData) in
+        NetworkManager.shared.callRequest(api: .credit(movieId: movie?.id ?? 0)) { (creditData: CreditData) in
             self.creditData = creditData
             group.leave()
         } failureHandler: { code, message in
@@ -125,14 +125,14 @@ final class MovieDetailViewController: BaseViewController {
     }
     
     override func configureView() {
-        detailSectionView.configureData(date: trend?.releaseDate ?? "All.Unknown".localized(),
-                                        rate: trend?.voteAverage ?? 0.0,
-                                        genreCodes: trend?.genreIds ?? [-1])
+        detailSectionView.configureData(date: movie?.releaseDate ?? "All.Unknown".localized(),
+                                        rate: movie?.voteAverage ?? 0.0,
+                                        genreCodes: movie?.genreIds ?? [-1])
         
         synopsisLabel.numberOfLines = 3
         synopsisLabel.font = .systemFont(ofSize: 12)
         synopsisLabel.textColor = .neutral2
-        synopsisLabel.text = trend?.overview ?? ""
+        synopsisLabel.text = movie?.overview ?? ""
         if synopsisLabel.text!.isEmpty {
             synopsisTitleLabel.isHidden = true
             moreButton.isHidden = true

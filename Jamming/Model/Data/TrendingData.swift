@@ -8,18 +8,18 @@
 import Foundation
 
 struct TrendingData: Decodable {
-    let results: [Trends]
+    let results: [MovieInfo]
 }
 
-struct Trends: Decodable {
-    let backdropPath: String
-    let id: Int
-    let title: String
-    let overview: String
-    let posterPath: String
+struct MovieInfo: Decodable {
+    let backdropPath: String?
+    let id: Int?
+    let title: String?
+    let overview: String?
+    let posterPath: String?
     let genreIds: [Int]
-    let releaseDate: String
-    let voteAverage: Double
+    let releaseDate: String?
+    let voteAverage: Double?
     
     enum CodingKeys: String, CodingKey {
         case backdropPath = "backdrop_path"

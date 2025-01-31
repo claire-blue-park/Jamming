@@ -29,16 +29,34 @@ final class SearchCollectionViewCell: BaseCollectionViewCell {
         return label
     }
     
-    func configureData() {
-        let test = "https://image.genie.co.kr/Y/IMAGE/IMG_ALBUM/080/189/460/80189460_1_600x600.JPG"
-        posterImageView.kf.setImage(with: URL(string: test))
-        movieTitleLabel.text = "그땐 그땐 그땐"
-        dateLabel.text = "8888.88.88"
-        let testGenre = ["액션", "SF"]
-        testGenre.forEach { genre in
+    func configureData(movie: MovieInfo) {
+        if let path = movie.posterPath {
+            let imageUrl = PosterSize.poster154.baseURL + path
+            posterImageView.kf.setImage(with: URL(string: imageUrl))
+        } else {
+            posterImageView.image = UIImage(systemName: "movieclapper.fill")
+            posterImageView.tintColor = .neutral3
+        }
+        movieTitleLabel.text = movie.title
+        dateLabel.text = "개봉일 \(movie.releaseDate ?? "All.Unknown".localized())"
+        
+        var genre: [String] = []
+        movie.genreIds.prefix(2).forEach { code in
+            let text = GenreCode.genre[code] ?? "All.Unknown".localized()
+            genre.append(text)
+        }
+
+        genre.forEach { genre in
             let label = genreLabel()
             label.text = genre
             genreStack.addArrangedSubview(label)
+        }
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        genreStack.arrangedSubviews.forEach { genre in
+            genre.removeFromSuperview()
         }
     }
     
@@ -48,10 +66,10 @@ final class SearchCollectionViewCell: BaseCollectionViewCell {
         posterImageView.contentMode = .scaleAspectFill
         
         movieTitleLabel.font = .boldSystemFont(ofSize: 14)
+        movieTitleLabel.numberOfLines = 2
         
         dateLabel.font = .systemFont(ofSize: 12)
         dateLabel.textColor = .neutral2
-        dateLabel.numberOfLines = 2
         
         genreStack.axis = .horizontal
         genreStack.spacing = 4
@@ -80,7 +98,7 @@ final class SearchCollectionViewCell: BaseCollectionViewCell {
         movieTitleLabel.snp.makeConstraints { make in
             make.top.equalTo(posterImageView.snp.top)
             make.leading.equalTo(posterImageView.snp.trailing).offset(20)
-            make.trailing.equalToSuperview()
+            make.trailing.equalToSuperview().offset(-12)
         }
         
         dateLabel.snp.makeConstraints { make in

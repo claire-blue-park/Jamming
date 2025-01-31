@@ -14,7 +14,7 @@ final class PosterCollectionViewCell: BaseCollectionViewCell {
     private let posterImageView = UIImageView()
     
     func configureData(path: String, isBackdrop: Bool) {
-        let basePath = isBackdrop ? BackdropSize.backdrop780.baseURL : PosterSize.poster300.baseURL
+        let basePath = isBackdrop ? BackdropSize.backdrop780.baseURL : PosterSize.poster185.baseURL
         let imageUrl = basePath + path
         posterImageView.kf.setImage(with: URL(string: imageUrl))
     }

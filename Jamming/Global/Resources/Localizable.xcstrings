@@ -18,6 +18,23 @@
         }
       }
     },
+    "Alert.Message.InputQuery" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please enter a search term."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "검색어를 입력해주세요."
+          }
+        }
+      }
+    },
     "Alert.Title.DeleteAccount" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -31,6 +48,23 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "탈퇴하기"
+          }
+        }
+      }
+    },
+    "Alert.Title.InputQuery" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No search terms"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "검색어가 없습니다."
           }
         }
       }
@@ -745,6 +779,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "프로필 설정"
+          }
+        }
+      }
+    },
+    "Searching.Info.NoValue" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not find the desired search results."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "원하는 검색 결과를 찾지 못했습니다."
           }
         }
       }

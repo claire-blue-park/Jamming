@@ -16,11 +16,16 @@ final class MovieCollectionViewCell: BaseCollectionViewCell {
     private let storyLabel = UILabel()
     private let likeButton = UIButton()
     
-    func configureData(trend: Trends) {
-        let imageUrl = PosterSize.poster300.baseURL + trend.posterPath
-        posterImageView.kf.setImage(with: URL(string: imageUrl))
-        movieTitleLabel.text = trend.title
-        storyLabel.text = trend.overview
+    func configureData(movie: MovieInfo) {
+        if let path = movie.posterPath {
+            let imageUrl = PosterSize.poster500.baseURL + path
+            posterImageView.kf.setImage(with: URL(string: imageUrl))
+        } else {
+            posterImageView.image = UIImage(systemName: "movieclapper.fill")
+            posterImageView.tintColor = .neutral3
+        }
+        movieTitleLabel.text = movie.title
+        storyLabel.text = movie.overview
     }
     
     private func callNetwork() {

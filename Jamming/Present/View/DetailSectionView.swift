@@ -29,7 +29,6 @@ class DetailSectionView: BaseStackView {
             let text = GenreCode.genre[code] ?? "All.Unknown".localized()
             genre.append(text)
         }
-   
         genreLabel.text = genre.joined(separator: ", ")
     }
     

@@ -19,16 +19,17 @@ final class CinemaViewController: BaseViewController {
 
     private let movieTitleLabel = UILabel()
     private let movieCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
-    
+
     private let gap: CGFloat = 12
     
-    private var trends: [Trends] = [] {
+    private var movies: [MovieInfo] = [] {
         didSet {
             movieCollectionView.reloadData()
         }
     }
     private var searches: [String] = [ ] {
         willSet {
+            UserDefaultsHelper.shared.saveSearchHistory(searches: newValue)
             historyCollectionView.reloadData()
             searchDeleteAllButton.isHidden = newValue.isEmpty
             searchInfoLabel.isHidden = !newValue.isEmpty
@@ -38,6 +39,9 @@ final class CinemaViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         profileSectionView.parentView = self
+        
+        searches = UserDefaultsHelper.shared.getSearchHistory()
+
         callNetwork()
         configureCollectionView()
     }
@@ -50,14 +54,15 @@ final class CinemaViewController: BaseViewController {
     
     @objc
     private func switchSearchScreen() {
-        navigationController?.pushViewController(MovieSearchingViewController(), animated: true)
+        let controller = MovieSearchingViewController()
+        controller.searchedQueryDelegate = self
+        navigationController?.pushViewController(controller, animated: true)
     }
     
     // MARK: -  Network
-    // trendingData > trends > trend
     private func callNetwork() {
         NetworkManager.shared.callRequest(api: .trending) { (trendingData: TrendingData) in
-            self.trends = trendingData.results
+            self.movies = trendingData.results
         } failureHandler: { code, message in
             print(message)
         }
@@ -115,9 +120,15 @@ final class CinemaViewController: BaseViewController {
         searchInfoLabel.font = .systemFont(ofSize: 12)
         
         searchDeleteAllButton.configuration = .plainStyle("Tab.First.SubTitle.Search.Button".localized())
+        searchDeleteAllButton.addTarget(self, action: #selector(onDeleteAllButtonTapped), for: .touchUpInside)
         
         movieTitleLabel.text = "Tab.First.SubTitle.Movies".localized()
         movieTitleLabel.font = .boldSystemFont(ofSize: 18)
+    }
+    
+    @objc
+    private func onDeleteAllButtonTapped() {
+        searches.removeAll()
     }
     
     override func setConstraints() {
@@ -168,7 +179,7 @@ final class CinemaViewController: BaseViewController {
 
 extension CinemaViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return collectionView.tag == 0 ? searches.count : trends.count
+        return collectionView.tag == 0 ? searches.count : movies.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -177,23 +188,28 @@ extension CinemaViewController: UICollectionViewDelegate, UICollectionViewDataSo
         case 0:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HistoryCollectionViewCell.getIdentifier, for: indexPath) as! HistoryCollectionViewCell
             cell.configureData(searchText: searches[indexPath.row])
+            cell.deleteSearch = {
+                self.searches.remove(at: indexPath.row)
+            }
             return cell
             
         default:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MovieCollectionViewCell.getIdentifier, for: indexPath) as! MovieCollectionViewCell
-            cell.configureData(trend: trends[indexPath.row])
+            cell.configureData(movie: movies[indexPath.row])
             return cell
         }
     }
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        
         switch collectionView.tag {
         case 0:
-            switchSearchScreen()
+            let controller = MovieSearchingViewController()
+            controller.searchedQueryDelegate = self
+            controller.historySearch(query: searches[indexPath.row])
+            navigationController?.pushViewController(controller, animated: true)
         default:
             let nav = MovieDetailViewController()
-            nav.trend = trends[indexPath.row]
+            nav.movie = movies[indexPath.row]
             navigationController?.pushViewController(nav, animated: true)
         }
     }
@@ -213,5 +229,13 @@ extension CinemaViewController: UICollectionViewDelegate, UICollectionViewDataSo
         }
         
         return cellSize
+    }
+}
+
+extension CinemaViewController: SearchedQueryDelegate {
+    func searchedQuery(queries: [String]) {
+        if queries.isEmpty { return }
+        
+        searches = (queries + searches).uniqued()
     }
 }
