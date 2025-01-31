@@ -17,10 +17,15 @@ final class CinemaViewController: BaseViewController {
     private let searchDeleteAllButton = UIButton()
     private let historyCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
 
-    private let searches = ["test", "teststeste", "esresre", "serse", "dfsfdsf", "dfsfdsf", "ds", "dfsdf", "dfsdf", "dsf"]
-    
     private let movieTitleLabel = UILabel()
     private let movieCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+    
+    private var searches: [String] = [ ] {
+        willSet {
+            searchDeleteAllButton.isHidden = newValue.isEmpty
+            searchInfoLabel.isHidden = !newValue.isEmpty
+        }
+    }
     
     private let gap: CGFloat = 12
 
@@ -84,6 +89,9 @@ final class CinemaViewController: BaseViewController {
     }
     
     override func configureView() {
+        searchDeleteAllButton.isHidden = searches.isEmpty
+        searchInfoLabel.isHidden = !searches.isEmpty
+        
         searchTitleLabel.text = "Tab.First.SubTitle.Search".localized()
         searchTitleLabel.font = .boldSystemFont(ofSize: 18)
         
@@ -99,7 +107,7 @@ final class CinemaViewController: BaseViewController {
     
     override func setConstraints() {
         [profileSectionView,
-         searchTitleLabel, searchInfoLabel, searchDeleteAllButton, historyCollectionView,
+         searchTitleLabel, searchDeleteAllButton, historyCollectionView, searchInfoLabel,
          movieTitleLabel, movieCollectionView].forEach { view in
             self.view.addSubview(view)
         }
@@ -145,7 +153,7 @@ final class CinemaViewController: BaseViewController {
 
 extension CinemaViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 10
+        return 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {

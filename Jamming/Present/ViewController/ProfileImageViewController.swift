@@ -11,7 +11,8 @@ import SnapKit
 final class ProfileImageViewController: BaseViewController {
     private var currentImageName = "" {
         willSet {
-            NotificationCenter.default.post(name: NSNotification.Name("ProfilImage"),
+            // 프로필 변경 알림
+            NotificationCenter.default.post(name: .profileImageNoti,
                                             object: nil,
                                             userInfo: ["imageName": newValue])
         }

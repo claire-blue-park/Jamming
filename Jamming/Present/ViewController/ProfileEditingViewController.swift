@@ -9,15 +9,31 @@ import UIKit
 import SnapKit
 
 final class ProfileEditingViewController: BaseViewController {
+    private var isCorrectNickname = false
     
     private let profileImageButton = ProfileImageSettingButton()
-    private let nickNameTextField = UnderLineTextField()
+    private let nicknameTextField = UnderLineTextField()
     private let errorLabel = UILabel()
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         profileImageButton.parentView = self
+        
+        // 이미지 변경 감지
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(ProfileImageReceivedNotification),
+                                               name: .profileImageNoti,
+                                               object: nil)
+    }
+    
+    @objc
+    func ProfileImageReceivedNotification(notification: NSNotification) {
+        if let imageName = notification.userInfo!["imageName"] as? String {
+            profileImageButton.setImage(imageName: imageName)
+        } else {
+            print(self, "nil: \(notification)")
+        }
     }
     
     override func configureNav() {
@@ -34,6 +50,18 @@ final class ProfileEditingViewController: BaseViewController {
     
     @objc
     private func switchScreenWithSave() {
+        // 프로필 변경이 있을 경우
+        if UserDefaultsHelper.shared.getNickname() != nicknameTextField.actualTextField.text ||
+           UserDefaultsHelper.shared.getImageName() != profileImageButton.getImageName() {
+            
+            // 1. 저장
+            UserDefaultsHelper.shared.saveUser(nickname: nicknameTextField.actualTextField.text!, image: profileImageButton.getImageName())
+            
+            // 2. 프로필 변경 알림
+            NotificationCenter.default.post(name: .profileUpdateNoti,
+                                            object: nil,
+                                            userInfo: nil)
+        }
         dismiss(animated: true)
     }
     
@@ -43,9 +71,37 @@ final class ProfileEditingViewController: BaseViewController {
     }
     
     override func configureView() {
-        errorLabel.text = "테스트"
+        errorLabel.text = ""
         errorLabel.font = .systemFont(ofSize: 12)
         errorLabel.textColor = .main
+        
+        // 기존 값 가져오기
+        profileImageButton.setImage(imageName: UserDefaultsHelper.shared.getImageName())
+        nicknameTextField.actualTextField.placeholder = UserDefaultsHelper.shared.getNickname()
+        nicknameTextField.actualTextField.addTarget(self, action: #selector(onEditingChanged), for: .editingChanged)
+    }
+    
+    @objc
+    private func onEditingChanged(_ textField: UITextField) {
+        
+        do {
+            errorLabel.text = try checkNickname(text: textField.text!)
+            isCorrectNickname = true
+        } catch NicknameError.noValue {
+            errorLabel.text = NicknameError.noValue.errorMessage
+            isCorrectNickname = false
+        } catch NicknameError.number {
+            errorLabel.text = NicknameError.number.errorMessage
+            isCorrectNickname = false
+        } catch NicknameError.special {
+            errorLabel.text = NicknameError.special.errorMessage
+            isCorrectNickname = false
+        } catch NicknameError.charCount {
+            errorLabel.text = NicknameError.charCount.errorMessage
+            isCorrectNickname = false
+        } catch {
+            print(NicknameError.unknown.errorMessage)
+        }
     }
     
     @objc
@@ -57,7 +113,7 @@ final class ProfileEditingViewController: BaseViewController {
     }
 
     override func setConstraints() {
-        [profileImageButton, nickNameTextField, errorLabel].forEach { view in
+        [profileImageButton, nicknameTextField, errorLabel].forEach { view in
             self.view.addSubview(view)
         }
         
@@ -67,15 +123,44 @@ final class ProfileEditingViewController: BaseViewController {
             make.size.equalTo(100)
         }
         
-        nickNameTextField.snp.makeConstraints { make in
+        nicknameTextField.snp.makeConstraints { make in
             make.top.equalTo(profileImageButton.snp.bottom).offset(20)
             make.horizontalEdges.equalToSuperview().inset(12)
             make.height.equalTo(44)
         }
         
         errorLabel.snp.makeConstraints { make in
-            make.top.equalTo(nickNameTextField.snp.bottom).offset(12)
-            make.horizontalEdges.equalTo(nickNameTextField.snp.horizontalEdges).inset(12)
+            make.top.equalTo(nicknameTextField.snp.bottom).offset(12)
+            make.horizontalEdges.equalTo(nicknameTextField.snp.horizontalEdges).inset(12)
         }
+    }
+    
+    private func checkNickname(text: String) throws -> String {
+        
+        let textArray = text.replacingOccurrences(of: " ", with: "").split(separator: "")
+        
+        // 0. 값없음
+        guard textArray.count != 0 else {
+            throw NicknameError.noValue
+        }
+        
+        // 1. 숫자 포함 불가
+        let number = textArray.contains{ Int($0) != nil }
+        guard !number else {
+            throw NicknameError.number
+        }
+        
+        // 2. 특수문자 포함 불가
+        let special: [Character] = ["@", "#", "$", "%"]
+        guard !textArray.contains(where: { special.contains($0) }) else {
+            throw NicknameError.special
+        }
+        
+        // 3. 2글자 이상 10글자 미만
+        guard 2 <= textArray.count && textArray.count < 10 else {
+            throw NicknameError.charCount
+        }
+        
+        return "Profile.Error.ValidName".localized()
     }
 }

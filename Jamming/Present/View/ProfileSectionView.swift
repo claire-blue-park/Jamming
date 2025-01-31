@@ -24,26 +24,37 @@ final class ProfileSectionView: BaseView {
         backgroundColor = .neutral3
         layer.cornerRadius = 12
         clipsToBounds = true
+    
+        reloadData()
         
-        movieBoxButton.configuration = .activeSolidStyle("Profile.Button.MovieBox".localized())
-        
-        nicknameLabel.text = "테스트"
         nicknameLabel.font = .boldSystemFont(ofSize: 16)
         
-        dateLabel.text = "8888.88 가입"
         dateLabel.textColor = .neutral2
         dateLabel.font = .systemFont(ofSize: 12)
         
         chevronButton.setImage(UIImage(systemName: "chevron.right"), for: .normal)
         chevronButton.tintColor = .neutral2
-        
-        profileImageView.image = UIImage(named: "profile_0")
+
         profileImageView.layer.cornerRadius = profileImageViewSize / 2
         profileImageView.layer.borderColor = UIColor.main.cgColor
         profileImageView.layer.borderWidth = 4
         profileImageView.clipsToBounds = true
         
         chevronButton.addTarget(self, action: #selector(switchScreen), for: .touchUpInside)
+        
+        // 프로필 변경 감지
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(reloadData),
+                                               name: .profileUpdateNoti,
+                                               object: nil)
+    }
+    
+    @objc
+    private func reloadData() {
+        profileImageView.image = UIImage(named: User.shared.imageName)
+        movieBoxButton.configuration = .activeSolidStyle("\(User.shared.likesCount)" + "Profile.Button.MovieBox".localized())
+        nicknameLabel.text = User.shared.nickname
+        dateLabel.text = User.shared.registerDate + " " + "Profile.JoinDate".localized()
     }
     
     @objc

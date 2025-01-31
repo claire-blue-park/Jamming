@@ -307,6 +307,23 @@
         }
       }
     },
+    "Profile.JoinDate" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "joined"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "가입"
+          }
+        }
+      }
+    },
     "Profile.Placeholder" : {
       "extractionState" : "manual",
       "localizations" : {

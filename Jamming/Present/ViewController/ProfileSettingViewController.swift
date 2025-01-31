@@ -18,13 +18,12 @@ final class ProfileSettingViewController: BaseViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
         profileImageButton.parentView = self
-//        nicknameTextField.actualTextField.delegate = self
         
+        // 이미지 변경 감지
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(ProfileImageReceivedNotification),
-                                               name: Notification.Name("ProfilImage"),
+                                               name: .profileImageNoti,
                                                object: nil)
     }
     
@@ -33,7 +32,7 @@ final class ProfileSettingViewController: BaseViewController {
         if let imageName = notification.userInfo!["imageName"] as? String {
             profileImageButton.setImage(imageName: imageName)
         } else {
-            print(self, "값 없음")
+            print(self, "nil: \(notification)")
         }
     }
     
@@ -145,31 +144,4 @@ final class ProfileSettingViewController: BaseViewController {
         return "Profile.Error.ValidName".localized()
     }
 }
-//
-//extension ProfileSettingViewController: UITextFieldDelegate {
-//
-//    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-//        
-//        do {
-//            errorLabel.text = try checkNickname(text: textField.text! + string)
-//            isCorrectNickname = true
-//        } catch NicknameError.noValue {
-//            errorLabel.text = NicknameError.noValue.errorMessage
-//            isCorrectNickname = false
-//        } catch NicknameError.number {
-//            errorLabel.text = NicknameError.number.errorMessage
-//            isCorrectNickname = false
-//        } catch NicknameError.special {
-//            errorLabel.text = NicknameError.special.errorMessage
-//            isCorrectNickname = false
-//        } catch NicknameError.charCount {
-//            errorLabel.text = NicknameError.charCount.errorMessage
-//            isCorrectNickname = false
-//        } catch {
-//            print("알 수 없는 오류")
-//        }
-//        
-//        return true
-//    }
-//}
 
