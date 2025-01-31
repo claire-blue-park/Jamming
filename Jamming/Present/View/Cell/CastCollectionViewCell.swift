@@ -12,26 +12,32 @@ import SnapKit
 final class CastCollectionViewCell: BaseCollectionViewCell {
     private let actorImageView = UIImageView()
     private let krNameLabel = UILabel()
-    private let enNameLabel = UILabel()
+    private let characterLabel = UILabel()
     
     private let imageSize: CGFloat = 60
     
-    func configureData() {
-        let test = "https://image.genie.co.kr/Y/IMAGE/IMG_ALBUM/080/189/460/80189460_1_600x600.JPG"
-        actorImageView.kf.setImage(with: URL(string: test))
-        krNameLabel.text = "테스트"
-        enNameLabel.text = "test"
+    func configureData(cast: Cast?) {
+        guard let cast else { return }
+        if let profilePath = cast.profilePath {
+            actorImageView.kf.setImage(with: URL(string: ProfileSize.profile185.baseURL + profilePath))
+        } else {
+            actorImageView.image = UIImage(systemName: "person.circle.fill")
+            actorImageView.tintColor = .neutral3
+        }
+        
+        krNameLabel.text = cast.name
+        characterLabel.text = cast.character
     }
     
     override func configureView() {
         actorImageView.layer.cornerRadius = imageSize / 2
         actorImageView.clipsToBounds = true
-        actorImageView.contentMode = .scaleAspectFit
+        actorImageView.contentMode = .scaleAspectFill
         
         krNameLabel.font = .boldSystemFont(ofSize: 14)
         
-        enNameLabel.font = .systemFont(ofSize: 12)
-        enNameLabel.textColor = .neutral2
+        characterLabel.font = .systemFont(ofSize: 12)
+        characterLabel.textColor = .neutral2
     }
     
     override func setConstraints() {
@@ -39,7 +45,7 @@ final class CastCollectionViewCell: BaseCollectionViewCell {
         stack.axis = .vertical
         
         stack.addArrangedSubview(krNameLabel)
-        stack.addArrangedSubview(enNameLabel)
+        stack.addArrangedSubview(characterLabel)
         
         contentView.addSubview(actorImageView)
         contentView.addSubview(stack)
@@ -52,6 +58,7 @@ final class CastCollectionViewCell: BaseCollectionViewCell {
         
         stack.snp.makeConstraints { make in
             make.leading.equalTo(actorImageView.snp.trailing).offset(12)
+            make.trailing.equalToSuperview().offset(-12)
             make.centerY.equalTo(actorImageView.snp.centerY)
         }
         

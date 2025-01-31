@@ -16,11 +16,15 @@ final class MovieCollectionViewCell: BaseCollectionViewCell {
     private let storyLabel = UILabel()
     private let likeButton = UIButton()
     
-    func configureData() {
-        let test = "https://image.genie.co.kr/Y/IMAGE/IMG_ALBUM/080/189/460/80189460_1_600x600.JPG"
-        posterImageView.kf.setImage(with: URL(string: test))
-        movieTitleLabel.text = "그땐 그땐 그땐"
-        storyLabel.text = "내가 잘못했어 그 지겨운 말 억지로 널 붙잡고 흐느껴온 날 내 진심을 다 알아버렸어 그런 순간들을 모면하는 법까지 연기일 수 밖에 물론 넌 그런 나를 알고 있었기에 얼굴 붉히는 일 없이 더 이상 기회는 없을 거라고 단정하며 오히려 차분하게 날 떠났어"
+    func configureData(trend: Trends) {
+        let imageUrl = PosterSize.poster300.baseURL + trend.posterPath
+        posterImageView.kf.setImage(with: URL(string: imageUrl))
+        movieTitleLabel.text = trend.title
+        storyLabel.text = trend.overview
+    }
+    
+    private func callNetwork() {
+
     }
     
     override func configureView() {

@@ -56,3 +56,6 @@ iOSInjectionProject/
 
 # API Key
 APIKeys.swift
+
+# Request
+TMDBRequest.swift

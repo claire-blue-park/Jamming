@@ -20,10 +20,17 @@ class DetailSectionView: BaseStackView {
     private let separator1 = UIView()
     private let separator2 = UIView()
     
-    func configureData() {
-        dateLabel.text = "8888-88-88"
-        rateLabel.text = "8.8"
-        genreLabel.text = "액션, SF"
+    func configureData(date: String, rate: Double, genreCodes: [Int]) {
+        dateLabel.text = date
+        rateLabel.text = "\(rate)"
+        
+        var genre: [String] = []
+        genreCodes.prefix(2).forEach { code in
+            let text = GenreCode.genre[code] ?? "All.Unknown".localized()
+            genre.append(text)
+        }
+   
+        genreLabel.text = genre.joined(separator: ", ")
     }
     
     override func configureView() {

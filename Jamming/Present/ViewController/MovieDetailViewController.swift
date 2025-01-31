@@ -25,6 +25,10 @@ final class MovieDetailViewController: BaseViewController {
     private let posterTitleLabel = UILabel()
     private let posterCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     
+    var trend: Trends?
+    var imageData: ImageData?
+    var creditData: CreditData?
+    
     private let gap: CGFloat = 12
     private let heightBackdropSection: CGFloat = 280
     private let heightCastSection: CGFloat = 160
@@ -32,16 +36,14 @@ final class MovieDetailViewController: BaseViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        callNetwork()
         configureCollectionView()
     }
     
     override func configureNav() {
-        navigationItem.title = "영화제목"
-        navigationItem.rightBarButtonItem = UIBarButtonItem.init(image: UIImage(systemName: "heart"),
-                                                                 style: .plain,
-                                                                 target: self,
-                                                                 action: #selector(onLikeButtonTapped))
+        navigationItem.title = trend?.title
+        let item = UIBarButtonItem.init(image: UIImage(systemName: "heart"),style: .plain, target: self, action: #selector(onLikeButtonTapped))
+        navigationItem.rightBarButtonItem = item
     }
     
     @objc
@@ -56,6 +58,38 @@ final class MovieDetailViewController: BaseViewController {
         synopsisLabel.numberOfLines = isFullText ? 0 : 3
     }
     
+    // MARK: -  Network
+    private func callNetwork() {
+        let group = DispatchGroup()
+        
+        // 1. 이미지 API
+        group.enter()
+        NetworkManager.shared.callRequest(api: .image(movieId: trend?.id ?? 0)) { (imageData: ImageData) in
+            self.imageData = imageData
+            group.leave()
+        } failureHandler: { code, message in
+            print(message)
+            group.leave()
+        }
+        
+        // 2. 캐스트 API
+        group.enter()
+        NetworkManager.shared.callRequest(api: .credit(movieId: trend?.id ?? 0)) { (creditData: CreditData) in
+            self.creditData = creditData
+            group.leave()
+        } failureHandler: { code, message in
+            group.leave()
+        }
+        
+        group.notify(queue: .main) {
+            self.backdropCollectionView.reloadData()
+            self.castCollectionView.reloadData()
+            self.posterCollectionView.reloadData()
+        }
+    }
+    
+    
+    // MARK: - UI
     private func configureCollectionView() {
         let collectionViews = [backdropCollectionView, castCollectionView, posterCollectionView]
         
@@ -86,24 +120,28 @@ final class MovieDetailViewController: BaseViewController {
         
         // MARK: - cell 등록
         backdropCollectionView.register(PosterCollectionViewCell.self, forCellWithReuseIdentifier: PosterCollectionViewCell.getIdentifier)
-        
         posterCollectionView.register(PosterCollectionViewCell.self, forCellWithReuseIdentifier: PosterCollectionViewCell.getIdentifier)
-        
         castCollectionView.register(CastCollectionViewCell.self, forCellWithReuseIdentifier: CastCollectionViewCell.getIdentifier)
     }
     
     override func configureView() {
-        detailSectionView.configureData()
+        detailSectionView.configureData(date: trend?.releaseDate ?? "All.Unknown".localized(),
+                                        rate: trend?.voteAverage ?? 0.0,
+                                        genreCodes: trend?.genreIds ?? [-1])
         
         synopsisLabel.numberOfLines = 3
         synopsisLabel.font = .systemFont(ofSize: 12)
         synopsisLabel.textColor = .neutral2
-        synopsisLabel.text = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
-        
-        moreButton.configuration = .plainStyle("Detail.Button.More".localized())
-        moreButton.addTarget(self, action: #selector(onMoreButtonTapped), for: .touchUpInside)
-        
-        synopsisTitleLabel.text = "Detail.Title.Synopsis".localized()
+        synopsisLabel.text = trend?.overview ?? ""
+        if synopsisLabel.text!.isEmpty {
+            synopsisTitleLabel.isHidden = true
+            moreButton.isHidden = true
+        } else {
+            moreButton.configuration = .plainStyle("Detail.Button.More".localized())
+            moreButton.addTarget(self, action: #selector(onMoreButtonTapped), for: .touchUpInside)
+            synopsisTitleLabel.text = "Detail.Title.Synopsis".localized()
+        }
+  
         castTitleLabel.text = "Detail.Title.Cast".localized()
         posterTitleLabel.text = "Detail.Title.Poster".localized()
         
@@ -190,27 +228,29 @@ final class MovieDetailViewController: BaseViewController {
 
 extension MovieDetailViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 10
+        return switch collectionView.tag {
+        case 0: imageData?.backdrops.count ?? 0
+        case 1: creditData?.cast.count ?? 0
+        default: imageData?.posters.count ?? 0
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        
         switch collectionView.tag {
         case 1:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CastCollectionViewCell.getIdentifier, for: indexPath) as! CastCollectionViewCell
-            cell.configureData()
+            cell.configureData(cast: creditData?.cast[indexPath.row])
             return cell
             
         default:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PosterCollectionViewCell.getIdentifier, for: indexPath) as! PosterCollectionViewCell
-            cell.configureData()
+            let imagePath = collectionView.tag == 0 ? imageData?.backdrops[indexPath.row] : imageData?.posters[indexPath.row]
+            cell.configureData(path: imagePath?.filePath ?? "", isBackdrop: collectionView.tag == 0)
             return cell
         }
-        
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        
         let cellsWidth: CGFloat = switch collectionView.tag {
         case 0: UIScreen.main.bounds.width
         case 1: UIScreen.main.bounds.width / 2.4
@@ -221,7 +261,7 @@ extension MovieDetailViewController: UICollectionViewDelegate, UICollectionViewD
         case 1: (heightCastSection - gap) / 2
         default: heightPosterSection
         }
-        
+    
         return CGSize(width: cellsWidth, height: cellsHeight)
     }
 }

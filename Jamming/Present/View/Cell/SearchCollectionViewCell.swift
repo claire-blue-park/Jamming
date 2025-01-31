@@ -75,7 +75,6 @@ final class SearchCollectionViewCell: BaseCollectionViewCell {
             make.leading.top.equalToSuperview()
             make.bottom.equalTo(separator.snp.top).offset(-12)
             make.width.equalTo(80)
-//            make.height.equalTo(140)
         }
         
         movieTitleLabel.snp.makeConstraints { make in

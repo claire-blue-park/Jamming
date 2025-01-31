@@ -20,44 +20,59 @@ final class CinemaViewController: BaseViewController {
     private let movieTitleLabel = UILabel()
     private let movieCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     
+    private let gap: CGFloat = 12
+    
+    private var trends: [Trends] = [] {
+        didSet {
+            movieCollectionView.reloadData()
+        }
+    }
     private var searches: [String] = [ ] {
         willSet {
+            historyCollectionView.reloadData()
             searchDeleteAllButton.isHidden = newValue.isEmpty
             searchInfoLabel.isHidden = !newValue.isEmpty
         }
     }
-    
-    private let gap: CGFloat = 12
 
     override func viewDidLoad() {
         super.viewDidLoad()
         profileSectionView.parentView = self
-        
+        callNetwork()
         configureCollectionView()
     }
     
     override func configureNav() {
         navigationItem.title = "Tab.First.Title".localized()
-        navigationItem.rightBarButtonItem = UIBarButtonItem.init(image: UIImage(systemName: "magnifyingglass"),
-                                                                                       style: .plain,
-                                                                                       target: self,
-                                                                                       action: #selector(switchScreen))
+        let item = UIBarButtonItem.init(image: UIImage(systemName: "magnifyingglass"), style: .plain, target: self, action: #selector(switchSearchScreen))
+        navigationItem.rightBarButtonItem = item
     }
     
     @objc
-    private func switchScreen() {
+    private func switchSearchScreen() {
         navigationController?.pushViewController(MovieSearchingViewController(), animated: true)
     }
     
+    // MARK: -  Network
+    // trendingData > trends > trend
+    private func callNetwork() {
+        NetworkManager.shared.callRequest(api: .trending) { (trendingData: TrendingData) in
+            self.trends = trendingData.results
+        } failureHandler: { code, message in
+            print(message)
+        }
+    }
+    
+    // MARK: - UI
     private func configureCollectionView() {
         let collectionViews = [historyCollectionView, movieCollectionView]
         
-        // MARK: - 컬렉션뷰 고유 태그
+        // 컬렉션뷰 고유 태그
         for index in collectionViews.indices {
             collectionViews[index].tag = index
         }
         
-        // MARK: - 프로토콜 연결, 플로우 레이아웃
+        // 프로토콜 연결, 플로우 레이아웃
         collectionViews.forEach { collectionView in
             collectionView.delegate = self
             collectionView.dataSource = self
@@ -82,7 +97,7 @@ final class CinemaViewController: BaseViewController {
             collectionView.showsHorizontalScrollIndicator = false
         }
         
-        // MARK: - cell 등록
+        // cell 등록
         historyCollectionView.register(HistoryCollectionViewCell.self, forCellWithReuseIdentifier: HistoryCollectionViewCell.getIdentifier)
         
         movieCollectionView.register(MovieCollectionViewCell.self, forCellWithReuseIdentifier: MovieCollectionViewCell.getIdentifier)
@@ -153,7 +168,7 @@ final class CinemaViewController: BaseViewController {
 
 extension CinemaViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 0
+        return collectionView.tag == 0 ? searches.count : trends.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -161,13 +176,12 @@ extension CinemaViewController: UICollectionViewDelegate, UICollectionViewDataSo
         switch collectionView.tag {
         case 0:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HistoryCollectionViewCell.getIdentifier, for: indexPath) as! HistoryCollectionViewCell
-
             cell.configureData(searchText: searches[indexPath.row])
             return cell
             
         default:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MovieCollectionViewCell.getIdentifier, for: indexPath) as! MovieCollectionViewCell
-            cell.configureData()
+            cell.configureData(trend: trends[indexPath.row])
             return cell
         }
     }
@@ -176,25 +190,28 @@ extension CinemaViewController: UICollectionViewDelegate, UICollectionViewDataSo
         
         switch collectionView.tag {
         case 0:
-            return
+            switchSearchScreen()
         default:
-            navigationController?.pushViewController(MovieDetailViewController(), animated: true)
+            let nav = MovieDetailViewController()
+            nav.trend = trends[indexPath.row]
+            navigationController?.pushViewController(nav, animated: true)
         }
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let screenWidth = UIScreen.main.bounds.width
-        let attributes = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 14)]
-        let textWidth = (searches[indexPath.row] as NSString).size(withAttributes: attributes as [NSAttributedString.Key: Any]).width
         
-        let cellSize: (width: CGFloat, height: CGFloat) = switch collectionView.tag {
+        var cellSize = CGSize(width: 0, height: 0)
+    
+        switch collectionView.tag {
         case 0:
-            (textWidth + 12, 28)
+            let attributes = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 14)]
+            let textWidth = (searches[indexPath.row] as NSString).size(withAttributes: attributes as [NSAttributedString.Key: Any]).width
+            cellSize = CGSize(width: textWidth + 12, height: 28)
         default:
-            ((screenWidth - gap * 2) * 0.6, (screenWidth - gap * 2) * 0.6 * 1.6)
+            let screenWidth = UIScreen.main.bounds.width
+            cellSize = CGSize(width: (screenWidth - gap * 2) * 0.6, height: (screenWidth - gap * 2) * 0.6 * 1.6)
         }
         
-        return CGSize(width: cellSize.width, height: cellSize.height)
-
+        return cellSize
     }
 }

@@ -50,6 +50,7 @@ final class ProfileEditingViewController: BaseViewController {
     
     @objc
     private func switchScreenWithSave() {
+        if !isCorrectNickname { return }
         // 프로필 변경이 있을 경우
         if UserDefaultsHelper.shared.getNickname() != nicknameTextField.actualTextField.text ||
            UserDefaultsHelper.shared.getImageName() != profileImageButton.getImageName() {

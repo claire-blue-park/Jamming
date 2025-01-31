@@ -38,7 +38,7 @@ final class UserDefaultsHelper {
     }
     
     func getNickname() -> String {
-        return UserDefaults.standard.string(forKey: nicknameKey) ?? "Unknown"
+        return UserDefaults.standard.string(forKey: nicknameKey) ?? "All.Unknown".localized()
     }
     
     func getImageName() -> String {
@@ -46,7 +46,7 @@ final class UserDefaultsHelper {
     }
     
     func getRegisterDate() -> String {
-        return UserDefaults.standard.string(forKey: dateKey) ?? "Unknown"
+        return UserDefaults.standard.string(forKey: dateKey) ?? "All.Unknown".localized()
     }
     
     func getMoviebox() -> [String] {
