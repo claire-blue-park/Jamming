@@ -13,6 +13,7 @@ class ProfileImageCollectionViewCell: BaseCollectionViewCell {
     private let profileImageView = UIImageView()
     override var isSelected: Bool {
         didSet {
+            profileImageView.alpha = isSelected ? 1 : 0.5
             profileImageView.layer.borderColor = isSelected ? UIColor.main.cgColor : UIColor.neutral3.cgColor
         }
     }
@@ -20,6 +21,7 @@ class ProfileImageCollectionViewCell: BaseCollectionViewCell {
     func configureData(imageName: String, radius: CGFloat) {
         profileImageView.layer.cornerRadius = radius
         profileImageView.image = UIImage(named: imageName)
+        profileImageView.alpha = 0.5
         profileImageView.contentMode = .scaleAspectFill
         profileImageView.layer.borderColor = UIColor.neutral3.cgColor
         profileImageView.layer.borderWidth = 4

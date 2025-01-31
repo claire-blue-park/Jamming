@@ -11,6 +11,8 @@ import SnapKit
 final class ProfileImageSettingButton: BaseView {
     
     var parentView: BaseViewController?
+
+    private var imageName = "profile_\((0...11).randomElement() ?? 0)"
     
     private let profileImageView = UIImageView()
     private let circleView = UIView()
@@ -19,11 +21,18 @@ final class ProfileImageSettingButton: BaseView {
     
     private let profileImageViewSize = CGFloat(100)
     private let circleViewSize = CGFloat(30)
+    
+    func setImage(imageName: String) {
+        self.imageName = imageName
+        profileImageView.image = UIImage(named: imageName)
+    }
+    
+    func getImageName() -> String {
+        return imageName
+    }
 
     override func configureView() {
-        let randomIndex = (0...11).randomElement() ?? 0
-        let randomImage = UIImage(named: "profile_\(randomIndex)")
-        profileImageView.image = randomImage
+        profileImageView.image = UIImage(named: imageName)
         profileImageView.contentMode = .scaleAspectFill
         profileImageView.layer.cornerRadius = profileImageViewSize / 2
         profileImageView.layer.borderColor = UIColor.main.cgColor
@@ -37,7 +46,6 @@ final class ProfileImageSettingButton: BaseView {
         cameraImageView.image = UIImage(systemName: "camera.fill")?.withAlignmentRectInsets(UIEdgeInsets(top: -4, left: 0, bottom: -4, right: 0))
         cameraImageView.contentMode = .scaleAspectFit
         cameraImageView.tintColor = .neutral0
-        
         
         actualButton.addTarget(self, action: #selector(switchScreen), for: .touchUpInside)
     }

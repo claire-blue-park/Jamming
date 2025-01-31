@@ -9,6 +9,13 @@ import UIKit
 import SnapKit
 
 final class ProfileImageViewController: BaseViewController {
+    private var currentImageName = "" {
+        willSet {
+            NotificationCenter.default.post(name: NSNotification.Name("ProfilImage"),
+                                            object: nil,
+                                            userInfo: ["imageName": newValue])
+        }
+    }
     
     private let profileImageButton = ProfileImageSettingButton()
     private let profileCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
@@ -20,20 +27,26 @@ final class ProfileImageViewController: BaseViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        profileCollectionView.delegate = self
-        profileCollectionView.dataSource = self
+        
+        configureCollectionView()
+        
+        currentImageName = profileImageButton.getImageName()
     }
     
     override func configureNav() {
         title = "Profile.Title.Image".localized()
+
     }
     
     override func configureView() {
         profileImageButton.isUserInteractionEnabled = false
+    }
+    
+    private func configureCollectionView() {
+        profileCollectionView.delegate = self
+        profileCollectionView.dataSource = self
         
         let layout = UICollectionViewFlowLayout()
-//        layout.scrollDirection = .vertical
         layout.collectionView?.isScrollEnabled = false
         layout.sectionInset = UIEdgeInsets(top: 0, left: sectionInset, bottom: 0, right: sectionInset)
         layout.minimumLineSpacing = spacing
@@ -73,5 +86,10 @@ extension ProfileImageViewController: UICollectionViewDelegate, UICollectionView
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: screenWidth, height: screenWidth)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        profileImageButton.setImage(imageName: "profile_\(indexPath.row)")
+        currentImageName = profileImageButton.getImageName()
     }
 }

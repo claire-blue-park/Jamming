@@ -55,14 +55,24 @@ extension SettingViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = settingListTableView.dequeueReusableCell(withIdentifier: SettingListTableViewCell.getIdentifier, for: indexPath) as! SettingListTableViewCell
-        cell.configureData(title: settingList[indexPath.row].options)
+        cell.configureData(title: settingList[indexPath.row].options)                                                                                                                                           
         return cell
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 48
     }
+    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        if settingList[indexPath.row] == SettingOptions.deleteAccount {
+            showSelectAlert(title: "Alert.Title.DeleteAccount".localized(), message: "Alert.Message.DeleteAccount".localized()) {
+                UserDefaultsHelper.shared.removeAllData()
+                guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                      let window = scene.windows.first else { return }
+                window.rootViewController = UINavigationController(rootViewController: OnboardingViewController())
+                window.makeKeyAndVisible()
+            }
+        }
     }
 }

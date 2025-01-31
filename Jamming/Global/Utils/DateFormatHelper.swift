@@ -12,4 +12,10 @@ final class DateFormatHelper {
     private let dateFormatter = DateFormatter()
     private init() { }
     
+    func getToday() -> String {
+        dateFormatter.dateFormat = "yyyy년 MM월 dd일"
+        let temp = dateFormatter.string(from: Date())
+        return temp
+    }
+
 }

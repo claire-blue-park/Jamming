@@ -10,7 +10,7 @@ import SnapKit
 
 final class UnderLineTextField: BaseView {
     
-    private let actualTextField = UITextField()
+    let actualTextField = UITextField()
     private let underLineView = UIView()
     
     override func configureView() {
