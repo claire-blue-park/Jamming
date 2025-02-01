@@ -11,4 +11,5 @@ extension NSNotification.Name {
     
     static let profileImageNoti = NSNotification.Name("ProfileImage")
     static let profileUpdateNoti = NSNotification.Name("ProfileUpdate")
+    static let movieboxUpdateNoti = NSNotification.Name("MovieboxUpdate")
 }

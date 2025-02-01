@@ -46,6 +46,11 @@ final class CinemaViewController: BaseViewController {
         configureCollectionView()
     }
     
+    @objc
+    private func onMovieboxUpdated() {
+        profileSectionView.updateMovieboxCount()
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
         movieCollectionView.reloadData()
     }
@@ -200,8 +205,6 @@ extension CinemaViewController: UICollectionViewDelegate, UICollectionViewDataSo
         default:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MovieCollectionViewCell.getIdentifier, for: indexPath) as! MovieCollectionViewCell
             cell.configureData(movie: movies[indexPath.row])
-//            cell.likeButton.movieId = movies[indexPath.row].id
-//            cell.likeButton.likeDelegate = self
             return cell
         }
     }

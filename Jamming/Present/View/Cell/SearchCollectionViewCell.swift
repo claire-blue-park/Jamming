@@ -14,7 +14,7 @@ final class SearchCollectionViewCell: BaseCollectionViewCell {
     private let movieTitleLabel = UILabel()
     private let dateLabel = UILabel()
     private let genreStack = UIStackView()
-    private let likeButton = UIButton()
+    private let likeButton = LikeButton()
     private let separator = UIView()
     
     private let genreLabel = {
@@ -32,12 +32,8 @@ final class SearchCollectionViewCell: BaseCollectionViewCell {
     private var isLike = false
     
     func configureData(movie: MovieInfo) {
-        if let movieId = movie.id {
-            self.movieId = movieId
-            isLike = UserDefaultsHelper.shared.getMoviebox().contains(movieId)
-            updateLikeButtonState()
-        }
-        
+        likeButton.configureData(movieId: movie.id)
+    
         if let path = movie.posterPath {
             let imageUrl = PosterSize.poster154.baseURL + path
             posterImageView.kf.setImage(with: URL(string: imageUrl))
@@ -46,7 +42,7 @@ final class SearchCollectionViewCell: BaseCollectionViewCell {
             posterImageView.tintColor = .neutral3
         }
         movieTitleLabel.text = movie.title
-        dateLabel.text = "개봉일 \(movie.releaseDate ?? "All.Unknown".localized())"
+        dateLabel.text = "\(movie.releaseDate ?? "All.Unknown".localized())" + "All.ReleaseDate".localized()
         
         var genre: [String] = []
         movie.genreIds.prefix(2).forEach { code in
@@ -69,10 +65,6 @@ final class SearchCollectionViewCell: BaseCollectionViewCell {
     }
     
     override func configureView() {
-        updateLikeButtonState()
-        likeButton.tintColor = .main
-        likeButton.addTarget(self, action: #selector(onLikeButtonTapped), for: .touchUpInside)
-        
         posterImageView.layer.cornerRadius = 4
         posterImageView.clipsToBounds = true
         posterImageView.contentMode = .scaleAspectFill
@@ -87,25 +79,6 @@ final class SearchCollectionViewCell: BaseCollectionViewCell {
         genreStack.spacing = 4
         
         separator.backgroundColor = .neutral3
-    }
-    
-    private func updateLikeButtonState() {
-        let likeImage = isLike ? UIImage(systemName: "heart.fill") : UIImage(systemName: "heart")
-        likeButton.setImage(likeImage, for: .normal)
-    }
-    
-    @objc
-    private func onLikeButtonTapped() {
-        guard let movieId else { return }
-        
-        isLike.toggle()
-        
-        if isLike {
-            UserDefaultsHelper.shared.saveMoviebox(movieId: movieId)
-        } else {
-            UserDefaultsHelper.shared.removeMoviebox(movieId: movieId)
-        }
-        updateLikeButtonState()
     }
     
     override func setConstraints() {

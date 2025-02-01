@@ -34,10 +34,7 @@ final class MovieDetailViewController: BaseViewController {
     private let heightBackdropSection: CGFloat = 280
     private let heightCastSection: CGFloat = 160
     private let heightPosterSection: CGFloat = 200
-    
-    private var movieId: Int?
-    private var isLike = false
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         callNetwork()
@@ -48,25 +45,10 @@ final class MovieDetailViewController: BaseViewController {
         guard let movieId = movie?.id else { return }
         
         navigationItem.title = movie?.title
-        isLike = UserDefaultsHelper.shared.getMoviebox().contains(movieId)
-        let item = UIBarButtonItem.init(image: isLike ? UIImage(systemName: "heart.fill") : UIImage(systemName: "heart"), style: .plain, target: self, action: #selector(onLikeButtonTapped))
-        navigationItem.rightBarButtonItem = item
-    }
-    
-    
-    @objc
-    private func onLikeButtonTapped(_ button: UIBarButtonItem) {
-        guard let movieId = movie?.id else { return }
-        
-        isLike.toggle()
-        
-        if isLike {
-            UserDefaultsHelper.shared.saveMoviebox(movieId: movieId)
-        } else {
-            UserDefaultsHelper.shared.removeMoviebox(movieId: movieId)
-        }
-        
-        button.image = isLike ? UIImage(systemName: "heart.fill") : UIImage(systemName: "heart")
+
+        let likeButton = LikeButton()
+        likeButton.configureData(movieId: movieId)
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: likeButton)
     }
     
     @objc

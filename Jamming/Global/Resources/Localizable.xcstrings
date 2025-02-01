@@ -69,6 +69,23 @@
         }
       }
     },
+    "All.ReleaseDate" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "released"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "개봉"
+          }
+        }
+      }
+    },
     "All.Unknown" : {
       "extractionState" : "manual",
       "localizations" : {

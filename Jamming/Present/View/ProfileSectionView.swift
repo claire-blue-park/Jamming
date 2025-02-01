@@ -47,6 +47,18 @@ final class ProfileSectionView: BaseView {
                                                selector: #selector(reloadData),
                                                name: .profileUpdateNoti,
                                                object: nil)
+        
+        // 무비박스 변경 감지
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(updateMovieboxCount),
+                                               name: .movieboxUpdateNoti,
+                                               object: nil)
+        
+    }
+    
+    @objc
+    func updateMovieboxCount() {
+        movieBoxButton.configuration = .activeSolidStyle("\(User.shared.likesCount)" + "Profile.Button.MovieBox".localized())
     }
     
     @objc
