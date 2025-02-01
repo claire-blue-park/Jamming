@@ -44,17 +44,17 @@
 - SnapKit (~> 5.7.1)
 - Kingfisher (~> 8.1.3)
 
-### UI
+### UI 프레임워크
 - UIKit (Programmatic UI) 
 
 ### 데이터 처리
 - UserDefaults
 
 ### 네트워크 통신
-- URLSession
+- Alamofire
 
 ### 비동기 처리
-- GCD (GDispatchGroup)
+- GCD (Grand Central Dispatch)
 
 ### API
 - [TMDB API](https://developer.themoviedb.org/docs/getting-started)
