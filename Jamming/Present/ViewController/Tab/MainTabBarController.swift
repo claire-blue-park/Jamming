@@ -8,7 +8,6 @@
 import UIKit
 
 final class MainTabBarController: UITabBarController {
-    
     private let tabBarItems = [(title: "Tab.First".localized(), image: "popcorn"),
                                (title: "Tab.Second".localized(), image: "film.stack"),
                                (title: "Tab.Third".localized(), image: "person.crop.circle") ]

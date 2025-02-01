@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-class DetailSectionView: BaseStackView {
+final class DetailSectionView: BaseStackView {
     private let dateIcon = UIImageView(image: UIImage(systemName: "calendar"))
     private let rateIcon = UIImageView(image: UIImage(systemName: "star.fill"))
     private let genreIcon = UIImageView(image: UIImage(systemName: "film.fill"))

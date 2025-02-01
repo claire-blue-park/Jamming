@@ -8,8 +8,7 @@
 import UIKit
 import SnapKit
 
-class ProfileImageCollectionViewCell: BaseCollectionViewCell {
-    
+final class ProfileImageCollectionViewCell: BaseCollectionViewCell {
     private let profileImageView = UIImageView()
     override var isSelected: Bool {
         didSet {

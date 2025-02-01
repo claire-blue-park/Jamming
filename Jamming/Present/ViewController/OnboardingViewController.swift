@@ -9,7 +9,6 @@ import UIKit
 import SnapKit
 
 final class OnboardingViewController: BaseViewController {
-    
     private let adImageView = UIImageView()
     private let titleLabel = UILabel()
     private let catchLabel = UILabel()
@@ -19,7 +18,6 @@ final class OnboardingViewController: BaseViewController {
         super.viewDidLoad()
 
     }
-
 
     override func configureView() {
         adImageView.image = UIImage(named: "onboarding")

@@ -9,6 +9,7 @@ import UIKit
 import SnapKit
 
 final class CinemaViewController: BaseViewController {
+    // MARK: - Properties
     
     private let profileSectionView = ProfileSectionView()
     
@@ -27,6 +28,7 @@ final class CinemaViewController: BaseViewController {
             movieCollectionView.reloadData()
         }
     }
+    
     private var searches: [String] = [ ] {
         willSet {
             UserDefaultsHelper.shared.saveSearchHistory(searches: newValue)
@@ -35,7 +37,19 @@ final class CinemaViewController: BaseViewController {
             searchInfoLabel.isHidden = !newValue.isEmpty
         }
     }
-
+    
+    // MARK: -  Network
+    
+    private func callNetwork() {
+        NetworkManager.shared.callRequest(api: .trending) { [weak self] (trendingData: TrendingData) in
+            self?.movies = trendingData.results
+        } failureHandler: { code, message in
+            print(message)
+        }
+    }
+    
+    // MARK: - Methods
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         profileSectionView.parentView = self
@@ -45,12 +59,7 @@ final class CinemaViewController: BaseViewController {
         callNetwork()
         configureCollectionView()
     }
-    
-    @objc
-    private func onMovieboxUpdated() {
-        profileSectionView.updateMovieboxCount()
-    }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         movieCollectionView.reloadData()
     }
@@ -68,16 +77,12 @@ final class CinemaViewController: BaseViewController {
         navigationController?.pushViewController(controller, animated: true)
     }
     
-    // MARK: -  Network
-    private func callNetwork() {
-        NetworkManager.shared.callRequest(api: .trending) { [weak self] (trendingData: TrendingData) in
-            self?.movies = trendingData.results
-        } failureHandler: { code, message in
-            print(message)
-        }
+    @objc
+    private func onDeleteAllButtonTapped() {
+        searches.removeAll()
     }
     
-    // MARK: - UI
+
     private func configureCollectionView() {
         let collectionViews = [historyCollectionView, movieCollectionView]
         
@@ -135,10 +140,6 @@ final class CinemaViewController: BaseViewController {
         movieTitleLabel.font = .boldSystemFont(ofSize: 18)
     }
     
-    @objc
-    private func onDeleteAllButtonTapped() {
-        searches.removeAll()
-    }
     
     override func setConstraints() {
         [profileSectionView,

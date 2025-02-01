@@ -8,7 +8,6 @@
 import UIKit
 
 final class SettingViewController: BaseViewController {
-    
     private let profileSectionView = ProfileSectionView()
     private let settingListTableView = UITableView()
     

@@ -9,7 +9,6 @@ import UIKit
 import SnapKit
 
 final class HistoryCollectionViewCell: BaseCollectionViewCell {
-    
     var deleteSearch: (() -> Void)?
     
     private let searchTextLabel = UILabel()

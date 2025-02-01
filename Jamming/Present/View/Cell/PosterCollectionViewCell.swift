@@ -10,7 +10,6 @@ import Kingfisher
 import SnapKit
 
 final class PosterCollectionViewCell: BaseCollectionViewCell {
-    
     private let posterImageView = UIImageView()
     
     func configureData(path: String, isBackdrop: Bool) {

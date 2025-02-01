@@ -9,6 +9,7 @@ import UIKit
 import SnapKit
 
 final class MovieSearchingViewController: BaseViewController {
+    // MARK: - Properties
     
     var searchedQueryDelegate: SearchedQueryDelegate?
     private var searchHistory: [String] = []
@@ -27,28 +28,9 @@ final class MovieSearchingViewController: BaseViewController {
     private var page = 1
     private var totalPages = 0
     private let sectionInset: CGFloat = 12
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        searchBar.delegate = self
-        configureCollectionView()
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        searchedQueryDelegate?.searchedQuery(queries: searchHistory.reversed())
-    }
-    
-    override func configureNav() {
-        navigationItem.title = "Searching.Title".localized()
-    }
-    
-    private func scrollToTop() {
-        searchCollectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
-    }
     
     // MARK: -  Network
+    
     private func callNetwork(query: String) {
         NetworkManager.shared.callRequest(api: .search(query: query, page: page)) { [weak self] (searchData: SearchData) in
         
@@ -70,7 +52,29 @@ final class MovieSearchingViewController: BaseViewController {
         }
     }
     
-    // MARK: - UI
+    // MARK: - Methods
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        searchBar.delegate = self
+        configureCollectionView()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        searchedQueryDelegate?.searchedQuery(queries: searchHistory.reversed())
+    }
+    
+    override func configureNav() {
+        navigationItem.title = "Searching.Title".localized()
+    }
+    
+    private func scrollToTop() {
+        searchCollectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
+    }
+    
+
     private func configureCollectionView() {
         searchCollectionView.delegate = self
         searchCollectionView.dataSource = self

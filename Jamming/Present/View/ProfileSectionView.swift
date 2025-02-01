@@ -9,7 +9,6 @@ import UIKit
 import SnapKit
 
 final class ProfileSectionView: BaseView {
-    
     var parentView: BaseViewController?
     
     private let profileImageView = UIImageView()

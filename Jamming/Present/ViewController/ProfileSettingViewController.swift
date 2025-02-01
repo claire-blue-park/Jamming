@@ -36,28 +36,11 @@ final class ProfileSettingViewController: BaseViewController {
         }
     }
     
-    override func configureNav() {
-        title = "Profile.Title.Setting".localized()
-    }
-    
-    override func configureView() {
-        profileImageButton.setImage(imageName: "profile_\((0...11).randomElement() ?? 0)")
-        
-        errorLabel.text = ""
-        errorLabel.font = .systemFont(ofSize: 12)
-        errorLabel.textColor = .main
-        
-        doneButton.configuration = .activeBorderStyle("Profile.Button.Done".localized())
-        doneButton.addTarget(self, action: #selector(onDoneButtonTapped), for: .touchUpInside)
-        
-        nicknameTextField.actualTextField.addTarget(self, action: #selector(onEditingChanged), for: .editingChanged)
-    }
-    
     @objc
     private func onEditingChanged(_ textField: UITextField) {
         
         do {
-            errorLabel.text = try checkNickname(text: textField.text!)
+            errorLabel.text = try NicknameHelper.shared.checkNickname(text: textField.text!)
             isCorrectNickname = true
         } catch NicknameError.noValue {
             errorLabel.text = NicknameError.noValue.errorMessage
@@ -86,6 +69,23 @@ final class ProfileSettingViewController: BaseViewController {
               let window = scene.windows.first else { return }
         window.rootViewController = MainTabBarController()
         window.makeKeyAndVisible()
+    }
+    
+    override func configureNav() {
+        title = "Profile.Title.Setting".localized()
+    }
+    
+    override func configureView() {
+        profileImageButton.setImage(imageName: "profile_\((0...11).randomElement() ?? 0)")
+        
+        errorLabel.text = ""
+        errorLabel.font = .systemFont(ofSize: 12)
+        errorLabel.textColor = .main
+        
+        doneButton.configuration = .activeBorderStyle("Profile.Button.Done".localized())
+        doneButton.addTarget(self, action: #selector(onDoneButtonTapped), for: .touchUpInside)
+        
+        nicknameTextField.actualTextField.addTarget(self, action: #selector(onEditingChanged), for: .editingChanged)
     }
 
     override func setConstraints() {
@@ -116,34 +116,6 @@ final class ProfileSettingViewController: BaseViewController {
             make.height.equalTo(44)
         }
     }
-    
-    private func checkNickname(text: String) throws -> String {
-        
-        let textArray = text.replacingOccurrences(of: " ", with: "").split(separator: "")
-        
-        // 0. 값없음
-        guard textArray.count != 0 else {
-            throw NicknameError.noValue
-        }
-        
-        // 1. 숫자 포함 불가
-        let number = textArray.contains{ Int($0) != nil }
-        guard !number else {
-            throw NicknameError.number
-        }
-        
-        // 2. 특수문자 포함 불가
-        let special: [Character] = ["@", "#", "$", "%"]
-        guard !textArray.contains(where: { special.contains($0) }) else {
-            throw NicknameError.special
-        }
-        
-        // 3. 2글자 이상 10글자 미만
-        guard 2 <= textArray.count && textArray.count < 10 else {
-            throw NicknameError.charCount
-        }
-        
-        return "Profile.Error.ValidName".localized()
-    }
+   
 }
 

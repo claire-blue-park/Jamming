@@ -39,11 +39,6 @@ final class ProfileImageViewController: BaseViewController {
 
     }
     
-    override func configureView() {
-        profileImageButton.isUserInteractionEnabled = false
-        profileImageButton.setImage(imageName: UserDefaultsHelper.shared.getImageName())
-    }
-    
     private func configureCollectionView() {
         profileCollectionView.delegate = self
         profileCollectionView.dataSource = self
@@ -55,6 +50,11 @@ final class ProfileImageViewController: BaseViewController {
         layout.minimumInteritemSpacing = spacing
         profileCollectionView.collectionViewLayout = layout
         profileCollectionView.register(ProfileImageCollectionViewCell.self, forCellWithReuseIdentifier: ProfileImageCollectionViewCell.getIdentifier)
+    }
+    
+    override func configureView() {
+        profileImageButton.isUserInteractionEnabled = false
+        profileImageButton.setImage(imageName: UserDefaultsHelper.shared.getImageName())
     }
     
     override func setConstraints() {

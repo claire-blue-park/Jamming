@@ -35,62 +35,11 @@ final class ProfileEditingViewController: BaseViewController {
             print(self, "nil: \(notification)")
         }
     }
-    
-    override func configureNav() {
-        title = "Profile.Title.Editing".localized()
-        navigationItem.leftBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "xmark"),
-                                                           style: .plain,
-                                                           target: self,
-                                                           action: #selector(switchScreenWithoutSave))
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Profile.Button.Save".localized(),
-                                                            style: .plain,
-                                                            target: self,
-                                                            action: #selector(switchScreenWithSave))
-    }
-    
-    @objc
-    private func switchScreenWithSave() {
-        let isNicknameChanged = UserDefaultsHelper.shared.getNickname() != nicknameTextField.actualTextField.text
-        let isProfileImageChanged = UserDefaultsHelper.shared.getImageName() != profileImageButton.getImageName()
-        
-        // 닉네임 변경되었는데 올바르지 않을 경우
-        if isNicknameChanged && !isCorrectNickname { return }
-        
-        // 프로필 변경이 있을 경우
-        if isNicknameChanged || isProfileImageChanged {
-            
-            // 1. 저장
-            UserDefaultsHelper.shared.saveUser(nickname: nicknameTextField.actualTextField.text!, image: profileImageButton.getImageName())
-            
-            // 2. 프로필 변경 알림
-            NotificationCenter.default.post(name: .profileUpdateNoti,
-                                            object: nil,
-                                            userInfo: nil)
-        }
-        dismiss(animated: true)
-    }
-    
-    @objc
-    private func switchScreenWithoutSave() {
-        dismiss(animated: true)
-    }
-    
-    override func configureView() {
-        errorLabel.text = ""
-        errorLabel.font = .systemFont(ofSize: 12)
-        errorLabel.textColor = .main
-        
-        // 기존 값 가져오기
-        profileImageButton.setImage(imageName: UserDefaultsHelper.shared.getImageName())
-        nicknameTextField.actualTextField.text = UserDefaultsHelper.shared.getNickname()
-        nicknameTextField.actualTextField.addTarget(self, action: #selector(onEditingChanged), for: .editingChanged)
-    }
-    
+   
     @objc
     private func onEditingChanged(_ textField: UITextField) {
-        
         do {
-            errorLabel.text = try checkNickname(text: textField.text!)
+            errorLabel.text = try NicknameHelper.shared.checkNickname(text: textField.text!)
             isCorrectNickname = true
         } catch NicknameError.noValue {
             errorLabel.text = NicknameError.noValue.errorMessage
@@ -116,6 +65,58 @@ final class ProfileEditingViewController: BaseViewController {
         window.rootViewController = MainTabBarController()
         window.makeKeyAndVisible()
     }
+    
+    override func configureNav() {
+        title = "Profile.Title.Editing".localized()
+        navigationItem.leftBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "xmark"),
+                                                           style: .plain,
+                                                           target: self,
+                                                           action: #selector(switchScreenWithoutSave))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Profile.Button.Save".localized(),
+                                                            style: .plain,
+                                                            target: self,
+                                                            action: #selector(switchScreenWithSave))
+    }
+    
+    // 1. 저장하면서 dismiis
+    @objc
+    private func switchScreenWithSave() {
+        let isNicknameChanged = UserDefaultsHelper.shared.getNickname() != nicknameTextField.actualTextField.text
+        let isProfileImageChanged = UserDefaultsHelper.shared.getImageName() != profileImageButton.getImageName()
+        
+        // 닉네임 변경되었는데 올바르지 않을 경우
+        if isNicknameChanged && !isCorrectNickname { return }
+        
+        // 프로필 변경이 있을 경우
+        if isNicknameChanged || isProfileImageChanged {
+            
+            // 1. 저장
+            UserDefaultsHelper.shared.saveUser(nickname: nicknameTextField.actualTextField.text!, image: profileImageButton.getImageName())
+            
+            // 2. 프로필 변경 알림
+            NotificationCenter.default.post(name: .profileUpdateNoti,
+                                            object: nil,
+                                            userInfo: nil)
+        }
+        dismiss(animated: true)
+    }
+    
+    // 2. 저장 없이 dismiis
+    @objc
+    private func switchScreenWithoutSave() {
+        dismiss(animated: true)
+    }
+    
+    override func configureView() {
+        errorLabel.text = ""
+        errorLabel.font = .systemFont(ofSize: 12)
+        errorLabel.textColor = .main
+        
+        // 기존 값 가져오기
+        profileImageButton.setImage(imageName: UserDefaultsHelper.shared.getImageName())
+        nicknameTextField.actualTextField.text = UserDefaultsHelper.shared.getNickname()
+        nicknameTextField.actualTextField.addTarget(self, action: #selector(onEditingChanged), for: .editingChanged)
+    }
 
     override func setConstraints() {
         [profileImageButton, nicknameTextField, errorLabel].forEach { view in
@@ -139,33 +140,5 @@ final class ProfileEditingViewController: BaseViewController {
             make.horizontalEdges.equalTo(nicknameTextField.snp.horizontalEdges).inset(12)
         }
     }
-    
-    private func checkNickname(text: String) throws -> String {
-        
-        let textArray = text.replacingOccurrences(of: " ", with: "").split(separator: "")
-        
-        // 0. 값없음
-        guard textArray.count != 0 else {
-            throw NicknameError.noValue
-        }
-        
-        // 1. 숫자 포함 불가
-        let number = textArray.contains{ Int($0) != nil }
-        guard !number else {
-            throw NicknameError.number
-        }
-        
-        // 2. 특수문자 포함 불가
-        let special: [Character] = ["@", "#", "$", "%"]
-        guard !textArray.contains(where: { special.contains($0) }) else {
-            throw NicknameError.special
-        }
-        
-        // 3. 2글자 이상 10글자 미만
-        guard 2 <= textArray.count && textArray.count < 10 else {
-            throw NicknameError.charCount
-        }
-        
-        return "Profile.Error.ValidName".localized()
-    }
+
 }

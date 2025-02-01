@@ -8,6 +8,8 @@
 import UIKit
 
 final class MovieDetailViewController: BaseViewController {
+    // MARK: - Properties
+    
     private var isFullText = false
     
     private let scrollView = UIScrollView()
@@ -34,6 +36,39 @@ final class MovieDetailViewController: BaseViewController {
     private let heightBackdropSection: CGFloat = 280
     private let heightCastSection: CGFloat = 160
     private let heightPosterSection: CGFloat = 200
+    
+    // MARK: -  Network
+    
+    private func callNetwork() {
+        let group = DispatchGroup()
+        
+        // 1. 이미지 API
+        group.enter()
+        NetworkManager.shared.callRequest(api: .image(movieId: movie?.id ?? 0)) { [weak self] (imageData: ImageData) in
+            self?.imageData = imageData
+            group.leave()
+        } failureHandler: { code, message in
+            print(message)
+            group.leave()
+        }
+        
+        // 2. 캐스트 API
+        group.enter()
+        NetworkManager.shared.callRequest(api: .credit(movieId: movie?.id ?? 0)) { [weak self] (creditData: CreditData) in
+            self?.creditData = creditData
+            group.leave()
+        } failureHandler: { code, message in
+            group.leave()
+        }
+        
+        group.notify(queue: .main) {
+            self.backdropCollectionView.reloadData()
+            self.castCollectionView.reloadData()
+            self.posterCollectionView.reloadData()
+        }
+    }
+    
+    // MARK: - Methods
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -58,38 +93,7 @@ final class MovieDetailViewController: BaseViewController {
         synopsisLabel.numberOfLines = isFullText ? 0 : 3
     }
     
-    // MARK: -  Network
-    private func callNetwork() {
-        let group = DispatchGroup()
-        
-        // 1. 이미지 API
-        group.enter()
-        NetworkManager.shared.callRequest(api: .image(movieId: movie?.id ?? 0)) { [weak self] (imageData: ImageData) in
-            self?.imageData = imageData
-            group.leave()
-        } failureHandler: { code, message in
-            print(message)
-            group.leave()
-        }
-        
-        // 2. 캐스트 API
-        group.enter()
-        NetworkManager.shared.callRequest(api: .credit(movieId: movie?.id ?? 0)) { [weak self] (creditData: CreditData) in
-            self?.creditData = creditData
-            group.leave()
-        } failureHandler: { code, message in
-            group.leave()
-        }
-        
-        group.notify(queue: .main) { 
-            self.backdropCollectionView.reloadData()
-            self.castCollectionView.reloadData()
-            self.posterCollectionView.reloadData()
-        }
-    }
     
-    
-    // MARK: - UI
     private func configureCollectionView() {
         let collectionViews = [backdropCollectionView, castCollectionView, posterCollectionView]
         

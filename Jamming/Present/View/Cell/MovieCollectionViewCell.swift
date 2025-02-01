@@ -10,14 +10,12 @@ import Kingfisher
 import SnapKit
 
 final class MovieCollectionViewCell: BaseCollectionViewCell {
-
     private let posterImageView = UIImageView()
     private let movieTitleLabel = UILabel()
     private let storyLabel = UILabel()
     private let likeButton = LikeButton()
 
     func configureData(movie: MovieInfo) {
-
         likeButton.configureData(movieId: movie.id)
         
         if let path = movie.posterPath {
@@ -33,7 +31,6 @@ final class MovieCollectionViewCell: BaseCollectionViewCell {
 
     
     override func configureView() {
-        
         posterImageView.layer.cornerRadius = 4
         posterImageView.clipsToBounds = true
         posterImageView.contentMode = .scaleAspectFill

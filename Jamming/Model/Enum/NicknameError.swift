@@ -23,4 +23,5 @@ enum NicknameError: Error {
         case .unknown: "Profile.Error.Unknown".localized()
         }
     }
+    
 }

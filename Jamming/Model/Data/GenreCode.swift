@@ -8,7 +8,6 @@
 import Foundation
 
 struct GenreCode {
-    
     static let genre: Dictionary<Int, String> = [
         Genre.action.code: "Genre.Action".localized(),
         Genre.adventure.code: "Genre.Adventure".localized(),

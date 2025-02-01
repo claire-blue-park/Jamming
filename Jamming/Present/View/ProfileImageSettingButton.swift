@@ -9,10 +9,8 @@ import UIKit
 import SnapKit
 
 final class ProfileImageSettingButton: BaseView {
-    
     var parentView: BaseViewController?
 
-//    private var imageName = "profile_\((0...11).randomElement() ?? 0)"
     private var imageName = ""
     
     private let profileImageView = UIImageView()
@@ -76,7 +74,7 @@ final class ProfileImageSettingButton: BaseView {
         actualButton.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
-        
+    
     }
 
 }

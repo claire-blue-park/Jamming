@@ -11,7 +11,7 @@ import SnapKit
 
 final class CastCollectionViewCell: BaseCollectionViewCell {
     private let actorImageView = UIImageView()
-    private let krNameLabel = UILabel()
+    private let nameLabel = UILabel()
     private let characterLabel = UILabel()
     
     private let imageSize: CGFloat = 60
@@ -25,7 +25,7 @@ final class CastCollectionViewCell: BaseCollectionViewCell {
             actorImageView.tintColor = .neutral3
         }
         
-        krNameLabel.text = cast.name
+        nameLabel.text = cast.name
         characterLabel.text = cast.character
     }
     
@@ -34,7 +34,7 @@ final class CastCollectionViewCell: BaseCollectionViewCell {
         actorImageView.clipsToBounds = true
         actorImageView.contentMode = .scaleAspectFill
         
-        krNameLabel.font = .boldSystemFont(ofSize: 14)
+        nameLabel.font = .boldSystemFont(ofSize: 14)
         
         characterLabel.font = .systemFont(ofSize: 12)
         characterLabel.textColor = .neutral2
@@ -44,7 +44,7 @@ final class CastCollectionViewCell: BaseCollectionViewCell {
         let stack = UIStackView()
         stack.axis = .vertical
         
-        stack.addArrangedSubview(krNameLabel)
+        stack.addArrangedSubview(nameLabel)
         stack.addArrangedSubview(characterLabel)
         
         contentView.addSubview(actorImageView)
