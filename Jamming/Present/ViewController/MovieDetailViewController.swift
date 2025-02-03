@@ -135,6 +135,7 @@ final class MovieDetailViewController: BaseViewController {
         pageControl.backgroundStyle = .prominent
         pageControl.currentPage = 0
         
+    
         detailSectionView.configureData(date: movie?.releaseDate ?? "All.Unknown".localized(),
                                         rate: movie?.voteAverage ?? 0.0,
                                         genreCodes: movie?.genreIds ?? [-1])
@@ -245,7 +246,7 @@ extension MovieDetailViewController: UICollectionViewDelegate, UICollectionViewD
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return switch collectionView.tag {
         case 0: imageData?.backdrops.count ?? 0
-        case 1: creditData?.cast.count ?? 0
+        case 1: creditData?.cast?.count ?? 0
         default: imageData?.posters.count ?? 0
         }
     }
@@ -254,7 +255,7 @@ extension MovieDetailViewController: UICollectionViewDelegate, UICollectionViewD
         switch collectionView.tag {
         case 1:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CastCollectionViewCell.getIdentifier, for: indexPath) as! CastCollectionViewCell
-            cell.configureData(cast: creditData?.cast[indexPath.row])
+            cell.configureData(cast: creditData?.cast?[indexPath.row])
             return cell
             
         default:

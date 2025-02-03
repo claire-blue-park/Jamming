@@ -42,10 +42,10 @@ final class SearchCollectionViewCell: BaseCollectionViewCell {
             posterImageView.tintColor = .neutral3
         }
         movieTitleLabel.text = movie.title
-        dateLabel.text = "\(movie.releaseDate ?? "All.Unknown".localized())" + "All.ReleaseDate".localized()
+        dateLabel.text = "All.ReleaseDate".localized() + " " + "\(movie.releaseDate ?? "All.Unknown".localized())"
         
         var genre: [String] = []
-        movie.genreIds.prefix(2).forEach { code in
+        movie.genreIds?.prefix(2).forEach { code in
             let text = GenreCode.genre[code] ?? "All.Unknown".localized()
             genre.append(text)
         }
