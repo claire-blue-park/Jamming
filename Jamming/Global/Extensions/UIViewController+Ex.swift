@@ -13,6 +13,10 @@ extension UIViewController: Identifier {
         return String(describing: self)
     }
     
+}
+
+extension UIViewController {
+    
     func showConfirmAlert(title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "확인", style: .cancel){ _ in

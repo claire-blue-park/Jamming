@@ -40,7 +40,7 @@ final class LikeButton: BaseButton {
             UserDefaultsHelper.shared.removeMoviebox(movieId: movieId)
         }
         
-        NotificationCenter.default.post(name: .profileUpdateNoti,
+        NotificationCenter.default.post(name: .movieboxUpdateNoti,
                                         object: nil,
                                         userInfo: nil)
     }
