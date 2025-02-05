@@ -50,6 +50,7 @@ final class MovieCollectionViewCell: BaseCollectionViewCell {
         
         storyLabel.snp.makeConstraints { make in
             make.bottom.horizontalEdges.equalToSuperview()
+            make.height.equalTo(44)
         }
 
         movieTitleLabel.snp.makeConstraints { make in
