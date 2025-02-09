@@ -9,7 +9,9 @@ import UIKit
 import SnapKit
 
 final class MbtiSectionView: BaseStackView {
+
     let viewModel = MbtiViewModel()
+
     
     private let EIButton = MbtiSelectButton()
     private let SNButton = MbtiSelectButton()
@@ -28,6 +30,7 @@ final class MbtiSectionView: BaseStackView {
         
         JPButton.configureData(top: "J", bottom: "P")
         JPButton.observeValue = viewModel.inputJP
+
     }
     
     override func setConstraints() {
@@ -38,6 +41,7 @@ final class MbtiSectionView: BaseStackView {
         
         [EIButton, SNButton, TFButton, JPButton].forEach { button in
             addArrangedSubview(button)
+
         }
     }
     

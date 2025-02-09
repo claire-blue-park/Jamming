@@ -1,11 +1,12 @@
 //
-//  MbtiViewModel.swift
+//  MbitiViewModel.swift
 //  Jamming
 //
 //  Created by Claire on 2/8/25.
 //
 
 import Foundation
+
 
 class MbtiViewModel {
     
@@ -48,3 +49,4 @@ class MbtiViewModel {
         outputIsDone.value = !outputMbti.contains(nil)
     }
 }
+
