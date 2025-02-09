@@ -34,6 +34,38 @@ final class UserDefaultsHelper {
         UserDefaults.standard.set(date, forKey: dateKey)
     }
     
+    func saveDate() {
+//        if !nickname.isEmpty {
+//            UserDefaults.standard.set(nickname, forKey: nicknameKey)
+//        }
+//        UserDefaults.standard.set(image, forKey: imageKey)
+        
+        let date = DateFormatHelper.shared.getToday()
+        UserDefaults.standard.set(date, forKey: dateKey)
+    }
+    
+    func saveNickname(nickname: String) {
+        if !nickname.isEmpty {
+            UserDefaults.standard.set(nickname, forKey: nicknameKey)
+        }
+//        UserDefaults.standard.set(image, forKey: imageKey)
+//        
+//        let date = DateFormatHelper.shared.getToday()
+//        UserDefaults.standard.set(date, forKey: dateKey)
+    }
+    
+    func saveImage(image: String) {
+//        if !nickname.isEmpty {
+//            UserDefaults.standard.set(nickname, forKey: nicknameKey)
+//        }
+        UserDefaults.standard.set(image, forKey: imageKey)
+        
+//        let date = DateFormatHelper.shared.getToday()
+//        UserDefaults.standard.set(date, forKey: dateKey)
+    }
+    
+    
+    
     func getNickname() -> String {
         return UserDefaults.standard.string(forKey: nicknameKey) ?? "All.Unknown".localized()
     }

@@ -16,7 +16,8 @@ final class ProfileImageSettingButton: BaseView {
     private let profileImageView = UIImageView()
     private let circleView = UIView()
     private let cameraImageView = UIImageView()
-    private let actualButton = UIButton()
+//    private let actualButton = UIButton()
+    var actualButton = UIButton()
     
     private let profileImageViewSize = CGFloat(100)
     private let circleViewSize = CGFloat(30)
@@ -45,11 +46,12 @@ final class ProfileImageSettingButton: BaseView {
         cameraImageView.contentMode = .scaleAspectFit
         cameraImageView.tintColor = .neutral0
         
-        actualButton.addTarget(self, action: #selector(switchScreen), for: .touchUpInside)
+//        actualButton.addTarget(self, action: #selector(switchScreen), for: .touchUpInside)
     }
     
     @objc
     private func switchScreen() {
+        
         parentView?.navigationController?.pushViewController(ProfileImageViewController(), animated: true)
     }
 

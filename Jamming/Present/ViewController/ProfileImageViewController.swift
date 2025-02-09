@@ -9,29 +9,27 @@ import UIKit
 import SnapKit
 
 final class ProfileImageViewController: BaseViewController {
-    private var currentImageName = "" {
-        willSet {
-            // 프로필 변경 알림
-            NotificationCenter.default.post(name: .profileImageNoti,
-                                            object: nil,
-                                            userInfo: ["imageName": newValue])
-        }
-    }
-    
+    var viewModel: ProfileSettingViewModel?
+
     private let profileImageButton = ProfileImageSettingButton()
     private let profileCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
-    
-    private let profileImagesRange = 0...11
+
     private lazy var screenWidth = (UIScreen.main.bounds.width - sectionInset * 2 - spacing * 3) / 4
     private let sectionInset: CGFloat = 12
     private let spacing: CGFloat = 8
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         configureCollectionView()
         
-        currentImageName = profileImageButton.getImageName()
+        bindData()
+    }
+    
+    private func bindData() {
+        viewModel?.outputImageName.bind { [weak self] name in
+            guard let self else { return }
+            profileImageButton.setImage(imageName: name)
+        }
     }
     
     override func configureNav() {
@@ -77,7 +75,7 @@ final class ProfileImageViewController: BaseViewController {
 
 extension ProfileImageViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        profileImagesRange.count
+        return 12
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -91,7 +89,6 @@ extension ProfileImageViewController: UICollectionViewDelegate, UICollectionView
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        profileImageButton.setImage(imageName: "profile_\(indexPath.row)")
-        currentImageName = profileImageButton.getImageName()
+        viewModel?.inputImageNumber.value = indexPath.row
     }
 }
