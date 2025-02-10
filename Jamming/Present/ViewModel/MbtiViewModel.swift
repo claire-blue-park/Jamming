@@ -8,7 +8,7 @@
 import Foundation
 
 
-class MbtiViewModel {
+final class MbtiViewModel {
     
 //    var inputButtonTapTrigger: Observable<Void?> = Observable(())
     

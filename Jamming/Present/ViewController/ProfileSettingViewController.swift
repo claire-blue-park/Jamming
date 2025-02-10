@@ -9,8 +9,6 @@ import UIKit
 import SnapKit
 
 final class ProfileSettingViewController: BaseViewController {
-//    private var isCorrectNickname = false
-    
     private let viewModel = ProfileSettingViewModel()
 
     private let profileImageButton = ProfileImageSettingButton()
@@ -26,58 +24,50 @@ final class ProfileSettingViewController: BaseViewController {
         profileImageButton.parentView = self
 
         let imageNumber = Int.random(in: 0...11)
-        viewModel.inputImageNumber.value = imageNumber
+        viewModel.input.imageNumber.value = imageNumber
         
         bindData()
     }
     
     private func bindData() {
-        viewModel.outputErrorMessage.bind { [weak self] message in
+        viewModel.output.errorMessage.bind { [weak self] message in
             guard let self else { return }
             errorLabel.text = message
         }
         
         mbtiSection.viewModel.outputIsDone.bind { [weak self] isDone in
             guard let self else { return }
-            viewModel.inputMbtiIsDone.value = isDone
+            viewModel.input.mbtiIsDone.value = isDone
         }
         
-        viewModel.outputIsDone.bind { [weak self] isDone in
+        viewModel.output.isDone.bind { [weak self] isDone in
             guard let self else { return }
             let title = "Profile.Button.Done".localized()
             if isDone {
-                print("true")
                 doneButton.configuration = .activeSolidStyle(title)
                 doneButton.addTarget(self, action: #selector(onDoneButtonTapped), for: .touchUpInside)
             } else {
-                print("false")
                 doneButton.configuration = .inactiveSolidStyle(title)
                 doneButton.removeTarget(self, action: #selector(onDoneButtonTapped), for: .touchUpInside)
             }
         }
         
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        // 넘어간 화면에서 클로저 내용 변경되었음
-        // 화면 다시 보여질 때 클로저 변경...?
-        viewModel.outputImageName.bind { [weak self] name in
+        viewModel.output.imageName.bind { [weak self] name in
             guard let self else { return }
             profileImageButton.setImage(imageName: name)
         }
+        
     }
+    
 
     @objc
     private func onEditingChanged(_ textField: UITextField) {
-        viewModel.inputName.value = textField.text ?? ""
+        viewModel.input.name.value = textField.text ?? ""
     }
     
     @objc
     private func onDoneButtonTapped() {
-        viewModel.inputUserNickname.value = nicknameTextField.actualTextField.text!
-        viewModel.inputUserImage.value = profileImageButton.getImageName() // 하나 더 만들 필요가 있나...
+        viewModel.input.doneButtonTrigger.value = ()
         
         guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let window = scene.windows.first else { return }
@@ -92,7 +82,8 @@ final class ProfileSettingViewController: BaseViewController {
     @objc
     private func onProfileImageButtonTapped() {
         let controller = ProfileImageViewController()
-        controller.viewModel = self.viewModel
+        controller.viewModel.input.imageNumber.value = viewModel.input.imageNumber.value
+        controller.profileImageDelegate = self
         navigationController?.pushViewController(controller, animated: true)
     }
     
@@ -157,4 +148,9 @@ final class ProfileSettingViewController: BaseViewController {
     
 }
 
-
+extension ProfileSettingViewController: ProfileImageDelegate {
+    func profileImageChanged(imageNumber: Int) {
+        viewModel.input.imageNumber.value = imageNumber
+    }
+    
+}

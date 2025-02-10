@@ -17,12 +17,20 @@ final class ProfileImageCollectionViewCell: BaseCollectionViewCell {
         }
     }
     
+//    override func prepareForReuse() {
+//        super.prepareForReuse()
+//        isSelected = false
+//    }
+    
     func configureData(imageName: String, radius: CGFloat) {
+        
+        print(isSelected)
+        
         profileImageView.layer.cornerRadius = radius
         profileImageView.image = UIImage(named: imageName)
-        profileImageView.alpha = 0.5
+        profileImageView.alpha = isSelected ? 1 : 0.5
         profileImageView.contentMode = .scaleAspectFill
-        profileImageView.layer.borderColor = UIColor.neutral3.cgColor
+        profileImageView.layer.borderColor = isSelected ? UIColor.main.cgColor : UIColor.neutral3.cgColor
         profileImageView.layer.borderWidth = 4
         profileImageView.clipsToBounds = true
     }

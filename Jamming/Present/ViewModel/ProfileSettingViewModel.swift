@@ -5,83 +5,90 @@
 //  Created by Claire on 2/8/25.
 //
 
-class ProfileSettingViewModel {
+import Foundation
+
+final class ProfileSettingViewModel: BaseViewModel {
     
-    // input
-    var inputName: Observable<String> = Observable("")
-    var inputUserNickname: Observable<String> = Observable("")
-    var inputUserImage: Observable<String> = Observable("")
+    var input: Input
+    var output: Output
     
-    var inputButtonTrigger: Observable<Void> = Observable(())
-    var inputMbtiIsDone: Observable<Bool> = Observable(false)
+    struct Input {
+        var name: Observable<String> = Observable("")
+        var doneButtonTrigger: Observable<Void> = Observable(())
+        var mbtiIsDone: Observable<Bool> = Observable(false)
+        var imageNumber: Observable<Int?> = Observable(nil) // 다음 화면으로 넘겨줘야 함
+    }
     
-    var inputImageNumber: Observable<Int?> = Observable(nil)
-    
-    // output
-    var outputIsCorrectName: Observable<Bool> = Observable(false) // 옵저버블일 필요?
-    var outputErrorMessage: Observable<String> = Observable("")
-    var outputIsDone:  Observable<Bool> = Observable(false)
-    
-    var outputImageName: Observable<String> = Observable("")
+    struct Output {
+        var errorMessage: Observable<String> = Observable("")
+        var isDone: Observable<Bool> = Observable(false)
+        var imageName: Observable<String> = Observable("")
+    }
+
+    private var isCorrectName = false
     
     init() {
         
-        inputImageNumber.bind { [weak self] number in
-            guard let self else { return }
-            if let number {
-                outputImageName.value = "profile_\(number)"
-                print(outputImageName.value)
-            }
-        }
+        input = Input()
+        output = Output()
         
-        inputMbtiIsDone.bind { [weak self] isDone in
+        transform()
+    }
+
+    func transform() {
+        input.mbtiIsDone.bind { [weak self] isDone in
             guard let self else { return }
             checkIsDone()
         }
         
         
-        inputName.bind { [weak self] name in
+        input.name.bind { [weak self] name in
             guard let self else { return }
             do {
-                outputErrorMessage.value = try NicknameHelper.shared.checkNickname(text: name)
-                outputIsCorrectName.value = true
+                output.errorMessage.value = try NicknameHelper.shared.checkNickname(text: name)
+                isCorrectName = true
                 
             } catch NicknameError.noValue {
-                outputErrorMessage.value = NicknameError.noValue.errorMessage
-                outputIsCorrectName.value = false
+                output.errorMessage.value = NicknameError.noValue.errorMessage
+                isCorrectName = false
                 
             } catch NicknameError.number {
-                outputErrorMessage.value = NicknameError.number.errorMessage
-                outputIsCorrectName.value = false
+                output.errorMessage.value = NicknameError.number.errorMessage
+                isCorrectName = false
                 
             } catch NicknameError.special {
-                outputErrorMessage.value = NicknameError.special.errorMessage
-                outputIsCorrectName.value = false
+                output.errorMessage.value = NicknameError.special.errorMessage
+                isCorrectName = false
                 
             } catch NicknameError.charCount {
-                outputErrorMessage.value = NicknameError.charCount.errorMessage
-                outputIsCorrectName.value = false
+                output.errorMessage.value = NicknameError.charCount.errorMessage
+                isCorrectName = false
                 
             } catch {
-                outputErrorMessage.value = NicknameError.unknown.errorMessage
-                outputIsCorrectName.value = false
+                output.errorMessage.value = NicknameError.unknown.errorMessage
+                isCorrectName = false
             }
             checkIsDone()
         }
         
-        inputUserNickname.bind { nickname in
+        input.doneButtonTrigger.bind { [weak self] _ in
+            guard let self else { return }
             UserDefaultsHelper.shared.saveDate()
-            UserDefaultsHelper.shared.saveNickname(nickname: nickname)
+            UserDefaultsHelper.shared.saveNickname(nickname: input.name.value)
+            UserDefaultsHelper.shared.saveImage(image: output.imageName.value)
         }
         
-        inputUserImage.bind { image in
-            UserDefaultsHelper.shared.saveImage(image: image)
+        input.imageNumber.bind { [weak self] number in
+            guard let self else { return }
+            
+            if let number {
+                output.imageName.value = ProfileImageName.getImageName(number: number)
+            }
         }
-        
     }
     
     private func checkIsDone() {
-        outputIsDone.value = inputMbtiIsDone.value && outputIsCorrectName.value
+        output.isDone.value = input.mbtiIsDone.value && isCorrectName
     }
     
 }

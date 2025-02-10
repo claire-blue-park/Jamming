@@ -16,8 +16,7 @@ final class ProfileImageSettingButton: BaseView {
     private let profileImageView = UIImageView()
     private let circleView = UIView()
     private let cameraImageView = UIImageView()
-//    private let actualButton = UIButton()
-    var actualButton = UIButton()
+    let actualButton = UIButton()
     
     private let profileImageViewSize = CGFloat(100)
     private let circleViewSize = CGFloat(30)
@@ -49,11 +48,10 @@ final class ProfileImageSettingButton: BaseView {
 //        actualButton.addTarget(self, action: #selector(switchScreen), for: .touchUpInside)
     }
     
-    @objc
-    private func switchScreen() {
-        
-        parentView?.navigationController?.pushViewController(ProfileImageViewController(), animated: true)
-    }
+//    @objc
+//    private func switchScreen() {
+//        parentView?.navigationController?.pushViewController(ProfileImageViewController(), animated: true)
+//    }
 
     override func setConstraints() {
         [profileImageView, circleView, cameraImageView, actualButton].forEach { view in

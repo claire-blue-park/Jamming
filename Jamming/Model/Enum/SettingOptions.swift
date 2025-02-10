@@ -8,7 +8,6 @@
 import Foundation
 
 enum SettingOptions: CaseIterable {
-    
     case faQ
     case personalQ
     case noti

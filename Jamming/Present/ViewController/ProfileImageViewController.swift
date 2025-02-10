@@ -9,14 +9,14 @@ import UIKit
 import SnapKit
 
 final class ProfileImageViewController: BaseViewController {
-    var viewModel: ProfileSettingViewModel?
+    var profileImageDelegate: ProfileImageDelegate?
+    let viewModel = ProfileImageViewModel()
+    private let screenViewModel = ScreenViewModel()
 
     private let profileImageButton = ProfileImageSettingButton()
-    private let profileCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
-
-    private lazy var screenWidth = (UIScreen.main.bounds.width - sectionInset * 2 - spacing * 3) / 4
-    private let sectionInset: CGFloat = 12
-    private let spacing: CGFloat = 8
+    private lazy var profileCollectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+    private var layout = UICollectionViewFlowLayout()
+       
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -26,7 +26,7 @@ final class ProfileImageViewController: BaseViewController {
     }
     
     private func bindData() {
-        viewModel?.outputImageName.bind { [weak self] name in
+        viewModel.output.imageName.bind { [weak self] name in
             guard let self else { return }
             profileImageButton.setImage(imageName: name)
         }
@@ -34,19 +34,17 @@ final class ProfileImageViewController: BaseViewController {
     
     override func configureNav() {
         title = "Profile.Title.Image".localized()
-
     }
     
     private func configureCollectionView() {
         profileCollectionView.delegate = self
         profileCollectionView.dataSource = self
         
-        let layout = UICollectionViewFlowLayout()
         layout.collectionView?.isScrollEnabled = false
-        layout.sectionInset = UIEdgeInsets(top: 0, left: sectionInset, bottom: 0, right: sectionInset)
-        layout.minimumLineSpacing = spacing
-        layout.minimumInteritemSpacing = spacing
-        profileCollectionView.collectionViewLayout = layout
+        layout.sectionInset = UIEdgeInsets(top: 0, left: screenViewModel.sectionInset, bottom: 0, right: screenViewModel.sectionInset)
+        layout.minimumLineSpacing = screenViewModel.spacing
+        layout.minimumInteritemSpacing = screenViewModel.spacing
+
         profileCollectionView.register(ProfileImageCollectionViewCell.self, forCellWithReuseIdentifier: ProfileImageCollectionViewCell.getIdentifier)
     }
     
@@ -80,15 +78,21 @@ extension ProfileImageViewController: UICollectionViewDelegate, UICollectionView
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ProfileImageCollectionViewCell.getIdentifier, for: indexPath) as! ProfileImageCollectionViewCell
-        cell.configureData(imageName: "profile_\(indexPath.row)", radius: screenWidth / 2)
+        
+        if viewModel.input.imageNumber.value == indexPath.row {
+            collectionView.selectItem(at: indexPath, animated: false, scrollPosition: .top)
+        }
+        
+        cell.configureData(imageName: "profile_\(indexPath.row)", radius: screenViewModel.screenWidth / 2)
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: screenWidth, height: screenWidth)
+        return CGSize(width: screenViewModel.screenWidth, height: screenViewModel.screenWidth)
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        viewModel?.inputImageNumber.value = indexPath.row
+        viewModel.input.imageNumber.value = indexPath.row
+        profileImageDelegate?.profileImageChanged(imageNumber: indexPath.row)
     }
 }

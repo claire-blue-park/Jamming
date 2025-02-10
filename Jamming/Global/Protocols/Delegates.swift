@@ -10,3 +10,7 @@ import Foundation
 protocol SearchedQueryDelegate {
     func searchedQuery(queries: [String])
 }
+
+protocol ProfileImageDelegate {
+    func profileImageChanged(imageNumber: Int)
+}
