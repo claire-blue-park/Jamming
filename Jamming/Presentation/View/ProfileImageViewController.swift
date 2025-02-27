@@ -11,7 +11,7 @@ import SnapKit
 final class ProfileImageViewController: BaseViewController {
     var profileImageDelegate: ProfileImageDelegate?
     let viewModel = ProfileImageViewModel()
-    private let screenViewModel = ScreenViewModel()
+    private let sizeViewModel = SizeProfileImageViewModel()
 
     private let profileImageButton = ProfileImageSettingButton()
     private lazy var profileCollectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -26,6 +26,8 @@ final class ProfileImageViewController: BaseViewController {
     }
     
     private func bindData() {
+        sizeViewModel.input.screenSize.value = UIScreen.main.bounds.size.width
+        
         viewModel.output.imageName.bind { [weak self] name in
             guard let self else { return }
             profileImageButton.setImage(imageName: name)
@@ -41,9 +43,9 @@ final class ProfileImageViewController: BaseViewController {
         profileCollectionView.dataSource = self
         
         layout.collectionView?.isScrollEnabled = false
-        layout.sectionInset = UIEdgeInsets(top: 0, left: screenViewModel.sectionInset, bottom: 0, right: screenViewModel.sectionInset)
-        layout.minimumLineSpacing = screenViewModel.spacing
-        layout.minimumInteritemSpacing = screenViewModel.spacing
+        layout.sectionInset = UIEdgeInsets(top: 0, left: sizeViewModel.output.sectionInset, bottom: 0, right: sizeViewModel.output.sectionInset)
+        layout.minimumLineSpacing = sizeViewModel.output.spacing
+        layout.minimumInteritemSpacing = sizeViewModel.output.spacing
 
         profileCollectionView.register(ProfileImageCollectionViewCell.self, forCellWithReuseIdentifier: ProfileImageCollectionViewCell.getIdentifier)
     }
@@ -83,12 +85,13 @@ extension ProfileImageViewController: UICollectionViewDelegate, UICollectionView
             collectionView.selectItem(at: indexPath, animated: false, scrollPosition: .top)
         }
         
-        cell.configureData(imageName: "profile_\(indexPath.row)", radius: screenViewModel.screenWidth / 2)
+        cell.configureData(imageName: "profile_\(indexPath.row)", radius: sizeViewModel.output.cellRadius)
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: screenViewModel.screenWidth, height: screenViewModel.screenWidth)
+//        sizeViewModel.input.screenSize.value = UIScreen.main.bounds.width
+        return sizeViewModel.output.cellSize
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {

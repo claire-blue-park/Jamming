@@ -9,55 +9,77 @@ import UIKit
 import SnapKit
 
 final class CinemaViewController: BaseViewController {
-    // MARK: - Properties
     
+    private let viewModel = CinemaViewModel()
+    private let sizeViewModel = SizeCinemaViewModel()
+    
+    // MARK: - Properties
     private let profileSectionView = ProfileSectionView()
     
     private let searchTitleLabel = UILabel()
     private let searchInfoLabel = UILabel()
     private let searchDeleteAllButton = UIButton()
-    private let historyCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+    private lazy var historyCollectionView = UICollectionView(frame: .zero, collectionViewLayout: historyFlowLayout)
+    
+    private let historyFlowLayout = UICollectionViewFlowLayout()
 
     private let movieTitleLabel = UILabel()
-    private let movieCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
-
-    private let gap: CGFloat = 12
+    private lazy var movieCollectionView = UICollectionView(frame: .zero, collectionViewLayout: movieFlowLayout)
     
-    private var movies: [MovieInfo] = [] {
-        didSet {
-            movieCollectionView.reloadData()
-        }
-    }
+    private let movieFlowLayout = UICollectionViewFlowLayout()
     
-    private var searches: [String] = [ ] {
-        willSet {
-            UserDefaultsHelper.shared.saveSearchHistory(searches: newValue)
-            historyCollectionView.reloadData()
-            searchDeleteAllButton.isHidden = newValue.isEmpty
-            searchInfoLabel.isHidden = !newValue.isEmpty
-        }
-    }
+//    private var movies: [MovieInfo] = [] {
+//        didSet {
+//            movieCollectionView.reloadData()
+//        }
+//    }
     
-    // MARK: -  Network
+//    private var searches: [String] = [ ] {
+//        willSet {
+//            UserDefaultsHelper.shared.saveSearchHistory(searches: newValue)
+//            historyCollectionView.reloadData()
+//            searchDeleteAllButton.isHidden = newValue.isEmpty
+//            searchInfoLabel.isHidden = !newValue.isEmpty
+//        }
+//    }
     
-    private func callNetwork() {
-        NetworkManager.shared.callRequest(api: .trending) { [weak self] (trendingData: TrendingData) in
-            self?.movies = trendingData.results
-        } failureHandler: { code, message in
-            print(message)
-        }
-    }
+ 
     
     // MARK: - Methods
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        viewModel.input.viewDidLoadTrigger.value = ()
+        
+        bindData()
+        
         profileSectionView.parentView = self
         
-        searches = UserDefaultsHelper.shared.getSearchHistory()
+//        searches = UserDefaultsHelper.shared.getSearchHistory()
 
-        callNetwork()
+//        callNetwork()
         configureCollectionView()
+    }
+    
+    private func bindData() {
+        sizeViewModel.input.screenSize.value = UIScreen.main.bounds.size.width
+        
+        // 네트워크 영화 결과
+        viewModel.output.movies.bind { [weak self] movies in
+            guard let self else { return }
+            movieCollectionView.reloadData()
+        }
+        
+        // 검색어 히스토리
+        viewModel.output.searches.bind { [weak self] searches in
+            guard let self else { return }
+            historyCollectionView.reloadData()
+            if let searches {
+                searchDeleteAllButton.isHidden = searches.isEmpty
+                searchInfoLabel.isHidden = !searches.isEmpty
+            }
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -73,13 +95,13 @@ final class CinemaViewController: BaseViewController {
     @objc
     private func switchSearchScreen() {
         let controller = MovieSearchingViewController()
-        controller.searchedQueryDelegate = self
+        controller.viewModel.input.searchedQueryDelegate = self
         navigationController?.pushViewController(controller, animated: true)
     }
     
     @objc
     private func onDeleteAllButtonTapped() {
-        searches.removeAll()
+        viewModel.input.newSearches.value = []
     }
     
 
@@ -99,8 +121,8 @@ final class CinemaViewController: BaseViewController {
             let layout = UICollectionViewFlowLayout()
             layout.scrollDirection = .horizontal
             
-            let sectionInset: CGFloat = gap
-            let spacing: CGFloat = gap
+            let sectionInset: CGFloat = sizeViewModel.output.gap
+            let spacing: CGFloat = sizeViewModel.output.gap
             
             if collectionView.tag == 0 {
                 layout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
@@ -123,8 +145,8 @@ final class CinemaViewController: BaseViewController {
     }
     
     override func configureView() {
-        searchDeleteAllButton.isHidden = searches.isEmpty
-        searchInfoLabel.isHidden = !searches.isEmpty
+//        searchDeleteAllButton.isHidden = searches.isEmpty
+//        searchInfoLabel.isHidden = !searches.isEmpty
         
         searchTitleLabel.text = "Tab.First.SubTitle.Search".localized()
         searchTitleLabel.font = .boldSystemFont(ofSize: 18)
@@ -189,23 +211,39 @@ final class CinemaViewController: BaseViewController {
 
 extension CinemaViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return collectionView.tag == 0 ? searches.count : movies.count
+        return collectionView.tag == 0 ?
+        viewModel.output.searches.value?.count ?? 0 :
+        viewModel.output.movies.value?.count ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
         switch collectionView.tag {
         case 0:
+            
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HistoryCollectionViewCell.getIdentifier, for: indexPath) as! HistoryCollectionViewCell
-            cell.configureData(searchText: searches[indexPath.row])
-            cell.deleteSearch = {
-                self.searches.remove(at: indexPath.row)
+            if let searches = viewModel.output.searches.value {
+                cell.configureData(searchText: searches[indexPath.row])
             }
+
+            cell.deleteSearch = { [weak self] in
+                guard let self else { return }
+//                var temp = viewModel.output.searches.value
+//                guard var temp = viewModel.output.searches.value else { return }
+//                temp.remove(at: indexPath.row)
+//                viewModel.input.newSearches.value = temp
+                viewModel.input.remove.value = indexPath.row
+            }
+            
             return cell
             
         default:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MovieCollectionViewCell.getIdentifier, for: indexPath) as! MovieCollectionViewCell
-            cell.configureData(movie: movies[indexPath.row])
+            if let movies = viewModel.output.movies.value {
+                print(#function)
+                cell.configureData(movie: movies[indexPath.row])
+            }
+
             return cell
         }
     }
@@ -214,29 +252,47 @@ extension CinemaViewController: UICollectionViewDelegate, UICollectionViewDataSo
         switch collectionView.tag {
         case 0:
             let controller = MovieSearchingViewController()
-            controller.searchedQueryDelegate = self
-            controller.historySearch(query: searches[indexPath.row])
+            controller.viewModel.input.searchedQueryDelegate = self
+            
+            // 꼭 bind를 하지 않아도 되는지........
+            if let searches = viewModel.output.searches.value {
+                controller.historySearch(query: searches[indexPath.row])
+            }
             navigationController?.pushViewController(controller, animated: true)
+            
         default:
-            let nav = MovieDetailViewController()
-            nav.movie = movies[indexPath.row]
-            navigationController?.pushViewController(nav, animated: true)
+            let controller = MovieDetailViewController()
+            
+            if let movies = viewModel.output.movies.value {
+                controller.viewModel.input.movie.value = movies[indexPath.row]
+            }
+            navigationController?.pushViewController(controller, animated: true)
         }
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
-        var cellSize = CGSize(width: 0, height: 0)
-    
-        switch collectionView.tag {
-        case 0:
-            let attributes = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 14)]
-            let textWidth = (searches[indexPath.row] as NSString).size(withAttributes: attributes as [NSAttributedString.Key: Any]).width
-            cellSize = CGSize(width: textWidth + 12, height: 28)
-        default:
-            let screenWidth = UIScreen.main.bounds.width
-            cellSize = CGSize(width: (screenWidth - gap * 2) * 0.6, height: (screenWidth - gap * 2) * 0.6 * 1.6)
-        }
+//        let screenWidth = UIScreen.main.bounds.width
+//        sizeViewModel.input.screenSize.value = screenWidth
+        let cellSize = collectionView.tag == 0 ?
+                       sizeViewModel.output.textCellSize :
+                       sizeViewModel.output.cellSize
+        
+//        var cellSize = CGSize(width: 0, height: 0)
+//    
+//        switch collectionView.tag {
+//        case 0:
+////            let attributes = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 14)]
+////            if let searches = viewModel.output.searches.value {
+////                let textWidth = (searches[indexPath.row] as NSString).size(withAttributes: attributes as [NSAttributedString.Key: Any]).width
+//            cellSize = sizeViewModel.output.textCellSize
+//            }
+//            
+//        default:
+//            let screenWidth = UIScreen.main.bounds.width
+////            cellSize = CGSize(width: (screenWidth - viewModel.output.gap * 2) * 0.6, height: (screenWidth - viewModel.output.gap * 2) * 0.6 * 1.6)
+//            cellSize = sizeViewModel.output.cellSize
+//        }
         
         return cellSize
     }
@@ -244,8 +300,10 @@ extension CinemaViewController: UICollectionViewDelegate, UICollectionViewDataSo
 
 extension CinemaViewController: SearchedQueryDelegate {
     func searchedQuery(queries: [String]) {
-        if queries.isEmpty { return }
         
-        searches = (queries + searches).uniqued()
+        viewModel.input.newSearches.value = queries
+//        if queries.isEmpty { return }
+//        
+//        searches = (queries + searches).uniqued()
     }
 }

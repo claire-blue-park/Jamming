@@ -10,7 +10,9 @@ import UIKit
 final class MovieDetailViewController: BaseViewController {
     // MARK: - Properties
     
-    private var isFullText = false
+//    private var isFullText = false
+    let viewModel = MovieDetailViewModel()
+    private let sizeViewModel = SizeDetailViewModel()
     
     private let scrollView = UIScrollView()
     
@@ -28,69 +30,103 @@ final class MovieDetailViewController: BaseViewController {
     private let posterTitleLabel = UILabel()
     private let posterCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     
-    var movie: MovieInfo?
-    var imageData: ImageData?
-    var creditData: CreditData?
+//    var movie: MovieInfo?
+//    var imageData: ImageData?
+//    var creditData: CreditData?
     
-    private let gap: CGFloat = 12
-    private let heightBackdropSection: CGFloat = 280
-    private let heightCastSection: CGFloat = 160
-    private let heightPosterSection: CGFloat = 200
+//    private let gap: CGFloat = 12
+//    private let heightBackdropSection: CGFloat = 280
+//    private let heightCastSection: CGFloat = 160
+//    private let heightPosterSection: CGFloat = 200
     
     // MARK: -  Network
     
-    private func callNetwork() {
-        let group = DispatchGroup()
-        
-        // 1. 이미지 API
-        group.enter()
-        NetworkManager.shared.callRequest(api: .image(movieId: movie?.id ?? 0)) { [weak self] (imageData: ImageData) in
-            self?.imageData = imageData
-            group.leave()
-        } failureHandler: { code, message in
-            print(message)
-            group.leave()
-        }
-        
-        // 2. 캐스트 API
-        group.enter()
-        NetworkManager.shared.callRequest(api: .credit(movieId: movie?.id ?? 0)) { [weak self] (creditData: CreditData) in
-            self?.creditData = creditData
-            group.leave()
-        } failureHandler: { code, message in
-            group.leave()
-        }
-        
-        group.notify(queue: .main) {
-            self.backdropCollectionView.reloadData()
-            self.castCollectionView.reloadData()
-            self.posterCollectionView.reloadData()
-        }
-    }
+//    private func callNetwork() {
+//        let group = DispatchGroup()
+//        
+//        // 1. 이미지 API
+//        group.enter()
+//        NetworkManager.shared.callRequest(api: .image(movieId: movie?.id ?? 0)) { [weak self] (imageData: ImageData) in
+//            self?.imageData = imageData
+//            group.leave()
+//        } failureHandler: { code, message in
+//            print(message)
+//            group.leave()
+//        }
+//        
+//        // 2. 캐스트 API
+//        group.enter()
+//        NetworkManager.shared.callRequest(api: .credit(movieId: movie?.id ?? 0)) { [weak self] (creditData: CreditData) in
+//            self?.creditData = creditData
+//            group.leave()
+//        } failureHandler: { code, message in
+//            group.leave()
+//        }
+//        
+//        group.notify(queue: .main) {
+//            self.backdropCollectionView.reloadData()
+//            self.castCollectionView.reloadData()
+//            self.posterCollectionView.reloadData()
+//        }
+//    }
     
     // MARK: - Methods
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        callNetwork()
+//        callNetwork()
         configureCollectionView()
+        bindData()
+    }
+    
+//    override func viewDidAppear(_ animated: Bool) {
+//        super.viewDidAppear(animated)
+//    
+//        let maxHeight = synopsisLabel.intrinsicContentSize.height
+//        synopsisLabel.numberOfLines = 3
+//        let minHeight = synopsisLabel.intrinsicContentSize.height
+//        moreButton.isHidden = maxHeight <= minHeight
+//        
+//        print("max: \(maxHeight)")
+//        print("min: \(minHeight)")
+//    }
+    
+    private func bindData() {
+        sizeViewModel.input.screenSize.value = UIScreen.main.bounds.size.width
+        
+        viewModel.output.isAllLeft.bind { [weak self] isAllLeft in
+            guard let self else { return }
+        
+            backdropCollectionView.reloadData()
+            castCollectionView.reloadData()
+            posterCollectionView.reloadData()
+            
+            // 페이지 컨트롤 업데이트
+            pageControl.numberOfPages = viewModel.output.imageData?.backdrops.count ?? 0
+        }
     }
     
     override func configureNav() {
-        guard let movieId = movie?.id else { return }
-        
-        navigationItem.title = movie?.title
-
-        let likeButton = LikeButton()
-        likeButton.configureData(movieId: movieId)
-        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: likeButton)
+        if let movie = viewModel.output.movie {
+            navigationItem.title = movie.title
+            
+            let likeButton = LikeButton()
+            likeButton.configureData(movieId: movie.id)
+            navigationItem.rightBarButtonItem = UIBarButtonItem(customView: likeButton)
+        }
     }
     
     @objc
     private func onMoreButtonTapped() {
-        isFullText = !isFullText
-        moreButton.configuration?.title = isFullText ? "Detail.Button.Hide".localized() : "Detail.Button.More".localized()
-        synopsisLabel.numberOfLines = isFullText ? 0 : 3
+//        isFullText = !isFullText
+//        moreButton.configuration?.title = isFullText ? "Detail.Button.Hide".localized() : "Detail.Button.More".localized()
+//        synopsisLabel.numberOfLines = isFullText ? 0 : 3
+        
+        viewModel.input.isFullText.value.toggle()
+        
+        moreButton.configuration?.title = viewModel.output.isFullText ? "Detail.Button.Hide".localized() : "Detail.Button.More".localized()
+
+        synopsisLabel.numberOfLines = viewModel.output.isFullText ? 0 : 3
     }
     
     
@@ -110,8 +146,8 @@ final class MovieDetailViewController: BaseViewController {
             let layout = UICollectionViewFlowLayout()
             layout.scrollDirection = .horizontal
             
-            let sectionInset: CGFloat = collectionView.tag == 0 ? 0 : gap
-            let spacing: CGFloat = collectionView.tag == 0 ? 0 : gap
+            let sectionInset: CGFloat = collectionView.tag == 0 ? 0 : sizeViewModel.output.gap
+            let spacing: CGFloat = collectionView.tag == 0 ? 0 : sizeViewModel.output.gap
             
             layout.sectionInset = UIEdgeInsets(top: 0, left: sectionInset, bottom: 0, right: sectionInset)
             layout.minimumLineSpacing = spacing
@@ -131,20 +167,41 @@ final class MovieDetailViewController: BaseViewController {
     override func configureView() {
         scrollView.showsVerticalScrollIndicator = false
         
-        pageControl.numberOfPages = movie?.backdropPath?.count ?? 0
+        guard let movie = viewModel.output.movie else { return }
+//        print(movie)
+        pageControl.numberOfPages = movie.backdropPath?.count ?? 0
         pageControl.backgroundStyle = .prominent
         pageControl.currentPage = 0
         
     
-        detailSectionView.configureData(date: movie?.releaseDate ?? "All.Unknown".localized(),
-                                        rate: movie?.voteAverage ?? 0.0,
-                                        genreCodes: movie?.genreIds ?? [-1])
+        detailSectionView.configureData(date: movie.releaseDate ?? "All.Unknown".localized(),
+                                        rate: movie.voteAverage ?? 0.0,
+                                        genreCodes: movie.genreIds ?? [-1])
         
-        synopsisLabel.numberOfLines = 3
-        synopsisLabel.font = .systemFont(ofSize: 12)
+       
         synopsisLabel.textColor = .neutral2
-        synopsisLabel.text = movie?.overview ?? ""
-        if synopsisLabel.text!.isEmpty {
+//        synopsisLabel.text = movie.overview ?? ""
+        requiredSynopsisHeight(labelText: movie.overview ?? "")
+        print("🥹🥹🥹\(requiredSynopsisHeight(labelText: movie.overview ?? ""))")
+        
+//        synopsisLabel.numberOfLines = 0
+        
+        // 높이 UILabel 확장 구현해서 구하기
+//        let lineNumber = synopsisLabel.calculateNumberOfLines()
+//        print("line: \(lineNumber)")
+//        synopsisLabel.numberOfLines = lineNumber < 3 ? 0 : 3
+//        moreButton.isHidden = lineNumber < 3
+
+        // intrinsicContentSize 속성으로 구하기
+//        let oldLabelHeight = synopsisLabel.intrinsicContentSize.height
+//        synopsisLabel.numberOfLines = 3
+//        let newLabelHeight = synopsisLabel.intrinsicContentSize.height
+//        moreButton.isHidden = oldLabelHeight <= newLabelHeight
+        
+        
+        
+        // 📍 TODO: - 시놉시스 외 캐스트 등이 비어있을 경우 처리
+        if viewModel.output.isSynopsisEmpty {
             synopsisTitleLabel.isHidden = true
             moreButton.isHidden = true
         } else {
@@ -159,6 +216,17 @@ final class MovieDetailViewController: BaseViewController {
         [synopsisTitleLabel, castTitleLabel, posterTitleLabel].forEach { label in
             label.font = .boldSystemFont(ofSize: 16)
         }
+    }
+    
+    private func requiredSynopsisHeight(labelText: String) -> CGFloat {
+        synopsisLabel.frame = CGRect(x: 0, y: 0, width: 200, height: .max)
+        synopsisLabel.numberOfLines = 0
+        synopsisLabel.lineBreakMode = .byWordWrapping
+        synopsisLabel.font = .systemFont(ofSize: 12)
+        synopsisLabel.text = labelText
+        synopsisLabel.sizeToFit()
+        return synopsisLabel.frame.height
+
     }
     
     override func setConstraints() {
@@ -185,7 +253,8 @@ final class MovieDetailViewController: BaseViewController {
         // MARK: - 백드롭 영역
         backdropCollectionView.snp.makeConstraints { make in
             make.top.horizontalEdges.equalToSuperview()
-            make.height.equalTo(heightBackdropSection)
+            make.height.equalTo(sizeViewModel.output.heightBackdropSection)
+//            make.height.equalTo(280)
         }
         
         pageControl.snp.makeConstraints { make in
@@ -224,7 +293,8 @@ final class MovieDetailViewController: BaseViewController {
         castCollectionView.snp.makeConstraints { make in
             make.top.equalTo(castTitleLabel.snp.bottom).offset(12)
             make.horizontalEdges.equalToSuperview()
-            make.height.equalTo(heightCastSection)
+            make.height.equalTo(sizeViewModel.output.heightCastSection)
+//            make.height.equalTo(160)
         }
         
         // MARK: - 포스터 영역
@@ -237,7 +307,8 @@ final class MovieDetailViewController: BaseViewController {
             make.top.equalTo(posterTitleLabel.snp.bottom).offset(12)
             make.horizontalEdges.equalToSuperview()
             make.bottom.equalToSuperview()
-            make.height.equalTo(heightPosterSection)
+            make.height.equalTo(sizeViewModel.output.heightPosterSection)
+//            make.height.equalTo(200)
         }
     }
 }
@@ -245,9 +316,9 @@ final class MovieDetailViewController: BaseViewController {
 extension MovieDetailViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return switch collectionView.tag {
-        case 0: imageData?.backdrops.count ?? 0
-        case 1: creditData?.cast?.count ?? 0
-        default: imageData?.posters.count ?? 0
+        case 0: viewModel.output.imageData?.backdrops.count ?? 0
+        case 1: viewModel.output.creditData?.cast?.count ?? 0
+        default: viewModel.output.imageData?.posters.count ?? 0
         }
     }
     
@@ -255,27 +326,29 @@ extension MovieDetailViewController: UICollectionViewDelegate, UICollectionViewD
         switch collectionView.tag {
         case 1:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CastCollectionViewCell.getIdentifier, for: indexPath) as! CastCollectionViewCell
-            cell.configureData(cast: creditData?.cast?[indexPath.row])
+            cell.configureData(cast: viewModel.output.creditData?.cast?[indexPath.row])
             return cell
             
         default:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PosterCollectionViewCell.getIdentifier, for: indexPath) as! PosterCollectionViewCell
-            let imagePath = collectionView.tag == 0 ? imageData?.backdrops[indexPath.row] : imageData?.posters[indexPath.row]
+            let imagePath = collectionView.tag == 0 ? viewModel.output.imageData?.backdrops[indexPath.row] : viewModel.output.imageData?.posters[indexPath.row]
             cell.configureData(path: imagePath?.filePath ?? "", isBackdrop: collectionView.tag == 0)
             return cell
         }
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+//        sizeViewModel.input.screenSize.value = UIScreen.main.bounds.size.width
+        
         let cellsWidth: CGFloat = switch collectionView.tag {
-        case 0: UIScreen.main.bounds.width
-        case 1: UIScreen.main.bounds.width / 2.4
-        default: UIScreen.main.bounds.width / 3.5
+        case 0: sizeViewModel.output.widthBackdropSection
+        case 1: sizeViewModel.output.widthCastSection
+        default: sizeViewModel.output.widthPosterSection
         }
         let cellsHeight: CGFloat = switch collectionView.tag {
-        case 0: heightBackdropSection
-        case 1: (heightCastSection - gap) / 2
-        default: heightPosterSection
+        case 0: sizeViewModel.output.heightBackdropSection
+        case 1: sizeViewModel.output.cellHeightCastSection // 2분할
+        default: sizeViewModel.output.heightPosterSection
         }
     
         return CGSize(width: cellsWidth, height: cellsHeight)
