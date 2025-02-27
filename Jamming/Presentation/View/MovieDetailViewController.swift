@@ -30,6 +30,8 @@ final class MovieDetailViewController: BaseViewController {
     private let posterTitleLabel = UILabel()
     private let posterCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     
+
+    
 //    var movie: MovieInfo?
 //    var imageData: ImageData?
 //    var creditData: CreditData?
@@ -71,7 +73,16 @@ final class MovieDetailViewController: BaseViewController {
 //    }
     
     // MARK: - Methods
-
+    
+    init() {
+        super.init(nibName: nil, bundle: nil)
+        print("init")
+    }
+    
+    @MainActor required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 //        callNetwork()
@@ -180,25 +191,45 @@ final class MovieDetailViewController: BaseViewController {
         
        
         synopsisLabel.textColor = .neutral2
+        
+//        let maxHeight = synopsisLabel.requiredMaxHeight(labelText: movie.overview ?? "")
+//        let minHeight = synopsisLabel.requiredSpecificHeight(labelText: movie.overview ?? "", lines: 3)
+//        
+//        moreButton.isHidden = maxHeight <= minHeight
+//        
+//        print("🥹MAX\(maxHeight)")
+//        print("🥹MIN\(minHeight)")
+        
+//        print("🥹🥹🥹\(requiredSynopsisHeight(labelText: movie.overview ?? ""))")
+        
 //        synopsisLabel.text = movie.overview ?? ""
-        requiredSynopsisHeight(labelText: movie.overview ?? "")
-        print("🥹🥹🥹\(requiredSynopsisHeight(labelText: movie.overview ?? ""))")
-        
+//        synopsisLabel.font = .systemFont(ofSize: 12)
 //        synopsisLabel.numberOfLines = 0
+//        let lines = synopsisLabel.calculateNumberOfLines()
+//        print("🔍🔍🔍\(lines)")
         
-        // 높이 UILabel 확장 구현해서 구하기
+//
+//        // 높이 UILabel 확장 구현해서 구하기
 //        let lineNumber = synopsisLabel.calculateNumberOfLines()
 //        print("line: \(lineNumber)")
 //        synopsisLabel.numberOfLines = lineNumber < 3 ? 0 : 3
 //        moreButton.isHidden = lineNumber < 3
+        
 
         // intrinsicContentSize 속성으로 구하기
-//        let oldLabelHeight = synopsisLabel.intrinsicContentSize.height
-//        synopsisLabel.numberOfLines = 3
-//        let newLabelHeight = synopsisLabel.intrinsicContentSize.height
-//        moreButton.isHidden = oldLabelHeight <= newLabelHeight
+//        view.layoutIfNeeded()
+        
+        synopsisLabel.numberOfLines = 0
+        synopsisLabel.font = .systemFont(ofSize: 12)
+        synopsisLabel.text = movie.overview ?? ""
+        let maxHeight = synopsisLabel.intrinsicContentSize.height
+        synopsisLabel.numberOfLines = 3
+        let minHeight = synopsisLabel.intrinsicContentSize.height
+        moreButton.isHidden = maxHeight <= minHeight
         
         
+        print("max: \(maxHeight)")
+        print("min: \(minHeight)")
         
         // 📍 TODO: - 시놉시스 외 캐스트 등이 비어있을 경우 처리
         if viewModel.output.isSynopsisEmpty {
@@ -218,16 +249,16 @@ final class MovieDetailViewController: BaseViewController {
         }
     }
     
-    private func requiredSynopsisHeight(labelText: String) -> CGFloat {
-        synopsisLabel.frame = CGRect(x: 0, y: 0, width: 200, height: .max)
-        synopsisLabel.numberOfLines = 0
-        synopsisLabel.lineBreakMode = .byWordWrapping
-        synopsisLabel.font = .systemFont(ofSize: 12)
-        synopsisLabel.text = labelText
-        synopsisLabel.sizeToFit()
-        return synopsisLabel.frame.height
-
-    }
+//    private func requiredSynopsisHeight(labelText: String) -> CGFloat {
+//        synopsisLabel.frame = CGRect(x: 0, y: 0, width: 200, height: .max)
+//        synopsisLabel.numberOfLines = 0
+//        synopsisLabel.lineBreakMode = .byWordWrapping
+//        synopsisLabel.font = .systemFont(ofSize: 12)
+//        synopsisLabel.text = labelText
+//        synopsisLabel.sizeToFit()
+//        return synopsisLabel.frame.height
+//
+//    }
     
     override func setConstraints() {
         view.addSubview(scrollView)

@@ -18,16 +18,43 @@ extension UILabel {
             return 0
         }
         
-        let attributes = [NSAttributedString.Key.font: font as Any]
+        print(text)
+        print(font)
         
+        let attributes = [NSAttributedString.Key.font: font as Any]
+       
         let labelSize = text.boundingRect(
             with: CGSize(width: self.bounds.width, height: .greatestFiniteMagnitude),
             options: .usesLineFragmentOrigin,
             attributes: attributes,
             context: nil
         )
+        print(self.bounds.width)
+        print(labelSize)
 
         return Int(ceil(CGFloat(labelSize.height) / font.lineHeight))
     }
     
+    func requiredMaxHeight(labelText: String) -> CGFloat {
+
+        frame = CGRect(x: 0, y: 0, width: 200, height: .max)
+        lineBreakMode = .byWordWrapping
+        numberOfLines = 0
+        font = .systemFont(ofSize: 12)
+        text = labelText
+        sizeToFit()
+        return frame.height
+
+    }
+    
+    func requiredSpecificHeight(labelText: String, lines: Int) -> CGFloat {
+        frame = CGRect(x: 0, y: 0, width: 200, height: .max)
+        lineBreakMode = .byWordWrapping
+        numberOfLines = lines
+        font = .systemFont(ofSize: 12)
+        text = labelText
+        sizeToFit()
+        return frame.height
+
+    }
 }
